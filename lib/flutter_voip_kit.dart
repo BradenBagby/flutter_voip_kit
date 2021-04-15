@@ -9,6 +9,8 @@ class FlutterVoipKit {
 
   //methods
   static const _methodChannelStartCall = "flutter_voip_kit.startCall";
+  static const _methodChannelReportIncomingCall =
+      "flutter_voip_kit.reportIncomingCall";
 
   static const MethodChannel _methodChannel =
       const MethodChannel(_methodChannelName);
@@ -22,7 +24,14 @@ class FlutterVoipKit {
   //methods
 
   static Future<bool> startCall(String handle) async {
-    final res = await _methodChannel.invokeMethod(_methodChannelStartCall);
+    final res = await _methodChannel.invokeMethod(_methodChannelStartCall,{"handle":handle});
+    return res as bool;
+  }
+
+  static Future<bool> reportIncomingCall(
+      {required String handle, required String uuid}) async {
+    final res = await _methodChannel.invokeMethod(
+        _methodChannelReportIncomingCall, {"uuid": uuid, "handle": handle});
     return res as bool;
   }
 }

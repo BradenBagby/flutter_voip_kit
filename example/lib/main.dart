@@ -17,6 +17,7 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   String _platformVersion = 'Unknown';
+  final testUUID = "33041937-05b2-464a-98ad-3910cbe0d09e";
 
   @override
   void initState() {
@@ -41,9 +42,18 @@ class _MyAppState extends State<MyApp> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text('Running on: $_platformVersion\n'),
-              ElevatedButton(onPressed: () {
-                FlutterVoipKit.startCall("63434");
-              }, child: Text("Start Call"))
+              ElevatedButton(
+                onPressed: () {
+                  FlutterVoipKit.startCall("6362845669");
+                },
+                child: Text("Start Call"),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  FlutterVoipKit.reportIncomingCall(uuid: testUUID, handle: "6362845669");
+                },
+                child: Text("Report Call"),
+              ),
             ],
           ),
         ),

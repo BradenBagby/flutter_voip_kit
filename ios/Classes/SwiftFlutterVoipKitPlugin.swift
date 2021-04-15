@@ -30,6 +30,7 @@ public class SwiftFlutterVoipKitPlugin: NSObject, FlutterPlugin {
     
     //methods
     static let _methodChannelStartCall = "flutter_voip_kit.startCall"
+    static let _methodChannelReportIncomingCall = "flutter_voip_kit.reportIncomingCall"
     
   public static func register(with registrar: FlutterPluginRegistrar) {
     
@@ -44,10 +45,24 @@ public class SwiftFlutterVoipKitPlugin: NSObject, FlutterPlugin {
     registrar.addMethodCallDelegate(instance, channel: methodChannel)
   }
 
+    //TODO: remove these defaults and get as arguments
   public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+    let args = call.arguments as? Dictionary<String, Any>
     if(call.method == SwiftFlutterVoipKitPlugin._methodChannelStartCall){
-        SwiftFlutterVoipKitPlugin.callController.startCall(handle: "6362845669", videoEnabled: false)
+        if let handle = args?["handle"] as? String{
+        SwiftFlutterVoipKitPlugin.callController.startCall(handle: handle, videoEnabled: false)
         result(true)
+        }else{
+        result(FlutterError.init(code: "bad args", message: nil, details: nil))
+        }
+    }else if call.method == SwiftFlutterVoipKitPlugin._methodChannelReportIncomingCall{
+        if let handle = args?["handle"] as? String, let uuid = args?["uuid"] as? String{
+        SwiftFlutterVoipKitPlugin.callController.reportIncomingCall(uuid: UUID(uuidString: uuid)!, handle: handle) { (error) in
+        result(error == nil)
+        }
+        }else{
+            result(FlutterError.init(code: "bad args", message: nil, details: nil))
+        }
     }
   }
 }

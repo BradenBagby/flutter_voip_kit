@@ -45,6 +45,22 @@ class CallController : NSObject {
       
       return providerConfiguration
     }()
+    
+    func reportIncomingCall(
+      uuid: UUID,
+      handle: String,
+      hasVideo: Bool = false,
+      completion: ((Error?) -> Void)?
+    ) {
+        print("report incoming call: \(handle) \(uuid)")
+      let update = CXCallUpdate()
+      update.remoteHandle = CXHandle(type: .phoneNumber, value: handle)
+      update.hasVideo = hasVideo
+      
+      provider.reportNewIncomingCall(with: uuid, update: update) { error in
+        completion?(error)
+      }
+    }
 }
 
 //MARK: user actions
@@ -79,7 +95,7 @@ extension CallController {
     }
     
     func startCall(handle: String, videoEnabled: Bool) {
-        print("CallController: user requested start call")
+        print("CallController: user requested start call \(handle)")
       let handle = CXHandle(type: .phoneNumber, value: handle)
       
       let startCallAction = CXStartCallAction(call: UUID(), handle: handle)
