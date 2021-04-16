@@ -1,28 +1,42 @@
 import 'dart:convert';
 
-enum CallState { connecting, active, held, ended }
+import 'flutter_voip_kit.dart';
+
+enum CallState { connecting, active, held, ended, failed, incoming }
+
+///start a call with this callback. return if successful or not
+typedef Future<bool> StartCallCallback();
 
 class Call {
-  String uuid;
-  String address;
-  bool outgoing;
+  final String uuid;
+  final String address;
+  final bool outgoing;
+
+  CallState callState;
+
+  //actions
+  Future<bool> end() async {
+    return FlutterVoipKit.endCall(this);
+  }
+
+  Future<bool> handleChangeState() {
+    return FlutterVoipKit.callStateChangeHandler!(this);
+  }
 
   Call({
     required this.uuid,
     required this.address,
     required this.outgoing,
+    required this.callState,
   });
 
-  Call copyWith({
-    String? uuid,
-    String? address,
-    bool? outgoing,
-  }) {
+  Call copyWith(
+      {String? uuid, String? address, bool? outgoing, CallState? callState}) {
     return Call(
-      uuid: uuid ?? this.uuid,
-      address: address ?? this.address,
-      outgoing: outgoing ?? this.outgoing,
-    );
+        uuid: uuid ?? this.uuid,
+        address: address ?? this.address,
+        outgoing: outgoing ?? this.outgoing,
+        callState: callState ?? this.callState);
   }
 
   Map<String, dynamic> toMap() {
@@ -30,24 +44,15 @@ class Call {
       'uuid': uuid,
       'address': address,
       'outgoing': outgoing,
+      'callState': this.callState.index
     };
-  }
-
-  factory Call.fromMap(Map<String, dynamic> map) {
-    return Call(
-      uuid: map['uuid'],
-      address: map['address'],
-      outgoing: map['outgoing'],
-    );
   }
 
   String toJson() => json.encode(toMap());
 
-  factory Call.fromJson(String source) => Call.fromMap(json.decode(source));
-
   @override
   String toString() =>
-      'Call(uuid: $uuid, address: $address, outgoing: $outgoing)';
+      'Call(uuid: $uuid, address: $address, outgoing: $outgoing, state: $callState)';
 
   @override
   bool operator ==(Object other) {
@@ -56,9 +61,11 @@ class Call {
     return other is Call &&
         other.uuid == uuid &&
         other.address == address &&
-        other.outgoing == outgoing;
+        other.outgoing == outgoing &&
+        other.callState == callState;
   }
 
   @override
-  int get hashCode => uuid.hashCode ^ address.hashCode ^ outgoing.hashCode;
+  int get hashCode =>
+      uuid.hashCode ^ address.hashCode ^ outgoing.hashCode ^ callState.hashCode;
 }
