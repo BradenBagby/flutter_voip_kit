@@ -80,6 +80,19 @@ class _MyAppState extends State<MyApp> {
                         uuid: testUUID);
                   },
                 ),
+                ElevatedButton(
+                  child: Text("Start Call"),
+                  onPressed: () {
+                    /*final uuid = testUUID
+                        .replaceFirst("3", "${Random().nextInt(10)}")
+                        .replaceFirst("4", "${Random().nextInt(10)}");*/
+                    FlutterVoipKit.startCall(
+                      "63628456" +
+                          "${Random().nextInt(10)}" +
+                          "${Random().nextInt(10)}",
+                    );
+                  },
+                ),
                 Expanded(
                   child: ListView.builder(
                     itemBuilder: (context, index) {

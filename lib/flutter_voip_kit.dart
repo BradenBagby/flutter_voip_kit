@@ -52,15 +52,11 @@ class FlutterVoipKit {
             if (call != null) {
               if (!await callStateChangeHandler!(
                   call..callState = CallState.connecting)) {
-                log("Failed to anser call");
-                reportCallEnded(
-                    uuid: call.uuid, reason: CallEndedReason.failed);
+                _callFailed(call);
               } else {
                 if (!await callStateChangeHandler!(
                     call..callState = CallState.active)) {
-                  log("Failed to activate call");
-                  reportCallEnded(
-                      uuid: call.uuid, reason: CallEndedReason.failed);
+                  _callFailed(call);
                 }
               }
             }
@@ -85,15 +81,14 @@ class FlutterVoipKit {
             if (!await callStateChangeHandler!(
                 newCall..callState = CallState.connecting)) {
               log("Failed to start call");
-              reportCallEnded(
-                  uuid: newCall.uuid, reason: CallEndedReason.failed);
-              await callStateChangeHandler!(
-                  newCall..callState = CallState.failed);
+              _callFailed(newCall);
             } else {
               callManager.addCall(newCall);
               reportOutgoingCall(uuid: newCall.uuid, finishedConnecting: true);
-              await callStateChangeHandler!(
-                  newCall..callState = CallState.active);
+              if (!await callStateChangeHandler!(
+                  newCall..callState = CallState.active)) {
+                await _callFailed(newCall);
+              }
             }
             break;
           case event_reset:
@@ -108,6 +103,16 @@ class FlutterVoipKit {
     });
 
     return true; //TODO:
+  }
+
+  ///when call failes, report to native device, perform user's action, and remove if user's action returns true
+  static Future<bool> _callFailed(Call call) async {
+    await reportCallEnded(uuid: call.uuid, reason: CallEndedReason.failed);
+    if (!await callStateChangeHandler!(call..callState = CallState.active)) {
+      callManager.removeCall(call);
+      return true;
+    }
+    return false;
   }
 
   //methods
