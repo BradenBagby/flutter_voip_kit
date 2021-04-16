@@ -4,7 +4,6 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'dart:async';
 
-import 'package:flutter/services.dart';
 import 'package:flutter_voip_kit/call.dart';
 import 'package:flutter_voip_kit/flutter_voip_kit.dart';
 
@@ -18,7 +17,6 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  String _platformVersion = 'Unknown';
   final testUUID = "33041937-05b2-464a-98ad-3910cbe0d09e";
   List<Call> calls = [];
 
@@ -26,41 +24,41 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     super.initState();
 
-    FlutterVoipKit.callStateChangeHandler = (call) async {
-      dev.log("widget call state changed lisener: $call");
-      setState(() {});
-      switch (call.callState) {
-        case CallState.connecting:
-          dev.log("--------------> Call connecting");
-          await Future.delayed(const Duration(seconds: 1));
-          return true;
-          break;
-        case CallState.active:
-          dev.log("--------> Call active");
-          return true;
-        case CallState.ended:
-          dev.log("--------> Call ended");
-          await Future.delayed(const Duration(seconds: 1));
-          return true;
-        case CallState.failed:
-          dev.log("--------> Call failed");
-          return true;
-        case CallState.held:
-          dev.log("--------> Call held");
-          return true;
-        default:
-          return false;
-          break;
-      }
-    };
+    FlutterVoipKit.init(callStateChangeHandler: callStateChangeHandler);
 
-    FlutterVoipKit.init();
-
-    FlutterVoipKit.callManager.callListStream.listen((event) {
+    FlutterVoipKit.callListStream.listen((event) {
       dev.log("Widgets call listener");
       calls = event;
       setState(() {});
     });
+  }
+
+  Future<bool> callStateChangeHandler(call) async {
+    dev.log("widget call state changed lisener: $call");
+    setState(() {});
+    switch (call.callState) {
+      case CallState.connecting:
+        dev.log("--------------> Call connecting");
+        await Future.delayed(const Duration(seconds: 1));
+        return true;
+        break;
+      case CallState.active:
+        dev.log("--------> Call active");
+        return true;
+      case CallState.ended:
+        dev.log("--------> Call ended");
+        await Future.delayed(const Duration(seconds: 1));
+        return true;
+      case CallState.failed:
+        dev.log("--------> Call failed");
+        return true;
+      case CallState.held:
+        dev.log("--------> Call held");
+        return true;
+      default:
+        return false;
+        break;
+    }
   }
 
   @override
@@ -76,26 +74,15 @@ class _MyAppState extends State<MyApp> {
                 ElevatedButton(
                   child: Text("Simlualate incoming call"),
                   onPressed: () {
-                    /*final uuid = testUUID
-                        .replaceFirst("3", "${Random().nextInt(10)}")
-                        .replaceFirst("4", "${Random().nextInt(10)}");*/
                     FlutterVoipKit.reportIncomingCall(
-                        handle: "63628456" +
-                            "${Random().nextInt(10)}" +
-                            "${Random().nextInt(10)}",
-                        uuid: testUUID);
+                        handle: "${Random().nextInt(10)}" * 9, uuid: testUUID);
                   },
                 ),
                 ElevatedButton(
                   child: Text("Start Call"),
                   onPressed: () {
-                    /*final uuid = testUUID
-                        .replaceFirst("3", "${Random().nextInt(10)}")
-                        .replaceFirst("4", "${Random().nextInt(10)}");*/
                     FlutterVoipKit.startCall(
-                      "63628456" +
-                          "${Random().nextInt(10)}" +
-                          "${Random().nextInt(10)}",
+                      "${Random().nextInt(10)}" * 9,
                     );
                   },
                 ),
@@ -104,34 +91,41 @@ class _MyAppState extends State<MyApp> {
                     itemBuilder: (context, index) {
                       final call = calls[index];
                       return Container(
-                        height: 100,
+                        color: call.callState == CallState.active
+                            ? Colors.green[300]
+                            : (call.callState == CallState.held ||
+                                    call.callState == CallState.connecting)
+                                ? Colors.yellow[200]
+                                : Colors.red,
+                        padding: EdgeInsets.all(16.0),
                         child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             Expanded(
-                              child: Text(call.address),
+                              child: Text("Number: ${call.address}"),
                             ),
-                            Text(call.callState.toString()),
-                            if (call.callState == CallState.active) ...[
+                            if (call.callState != CallState.connecting)
+                              ElevatedButton(
+                                onPressed: () {
+                                  call.hold(
+                                      onHold:
+                                          !(call.callState == CallState.held));
+                                },
+                                child: Text(call.callState == CallState.held
+                                    ? "Resume"
+                                    : "Hold"),
+                              ),
+                            if (call.callState == CallState.active)
                               IconButton(
-                                icon: Icon(Icons.delete),
+                                icon: Icon(
+                                  Icons.phone_disabled_sharp,
+                                  size: 30,
+                                  color: Colors.red,
+                                ),
                                 onPressed: () {
                                   call.end();
                                 },
                               ),
-                              IconButton(
-                                icon: Icon(Icons.hourglass_disabled),
-                                onPressed: () {
-                                  call.hold();
-                                },
-                              )
-                            ],
-                            if (call.callState == CallState.held)
-                              IconButton(
-                                icon: Icon(Icons.star),
-                                onPressed: () {
-                                  call.hold(onHold: false);
-                                },
-                              )
                           ],
                         ),
                       );

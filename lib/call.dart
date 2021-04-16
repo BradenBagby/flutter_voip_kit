@@ -4,27 +4,30 @@ import 'flutter_voip_kit.dart';
 
 enum CallState { connecting, active, held, ended, failed, incoming }
 
-///start a call with this callback. return if successful or not
-typedef Future<bool> StartCallCallback();
-
+///Call object represents a call going on with the users device
 class Call {
+  ///UUID of call
   final String uuid;
+
+  ///address or handle of the call
   final String address;
+
+  ///outgoing is true if call is initiated by the user
   final bool outgoing;
 
+  ///current state of call
   CallState callState;
 
   //actions
+
+  ///End the call initiated by the user
   Future<bool> end() async {
     return FlutterVoipKit.endCall(this);
   }
 
+  ///hold the call initiated by the user
   Future<bool> hold({bool onHold = true}) {
     return FlutterVoipKit.holdCall(this, onHold: onHold);
-  }
-
-  Future<bool> handleChangeState() {
-    return FlutterVoipKit.callStateChangeHandler!(this);
   }
 
   Call({

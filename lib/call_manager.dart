@@ -4,12 +4,16 @@ import 'package:flutter_voip_kit/call.dart';
 
 import 'flutter_voip_kit.dart';
 
-///keeps track of all active calls
+///internal class. keeps track of all active calls. Should not be accessed outside of plugin
 class CallManager {
+  ///list of active calls
   final List<Call> _calls = [];
-  final _callListStreamController = StreamController<List<Call>>.broadcast();
-  Stream<List<Call>> get callListStream => _callListStreamController.stream;
 
+  ///Stream that emits when a new call is added or removed
+  static final callListStreamController =
+      StreamController<List<Call>>.broadcast();
+
+  ///retrievs a call by its UUID if it exists in the current calls
   Call? getCallByUuid(String uuid) {
     try {
       return _calls.firstWhere(
@@ -19,27 +23,31 @@ class CallManager {
     }
   }
 
+  ///Adds a call and notifies listeners
   void addCall(Call call) {
     _calls.add(call);
-    notifyListeners();
+    _notifyListeners();
   }
 
+  ///Ends all calls
   void endAll() async {
     for (Call call in _calls) {
       await FlutterVoipKit
           .callStateChangeHandler!(call..callState = CallState.ended);
     }
     _calls.clear();
-    notifyListeners();
+    _notifyListeners();
   }
 
+  ///removes a call and notifies listeners
   void removeCall(Call call) {
     _calls.removeWhere(
         (element) => element.uuid.toLowerCase() == call.uuid.toLowerCase());
-    notifyListeners();
+    _notifyListeners();
   }
 
-  void notifyListeners() {
-    _callListStreamController.add(_calls);
+  ///notify listeners when _call list changes
+  void _notifyListeners() {
+    callListStreamController.add(_calls);
   }
 }
