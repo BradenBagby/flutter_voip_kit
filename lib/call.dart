@@ -19,6 +19,10 @@ class Call {
     return FlutterVoipKit.endCall(this);
   }
 
+  Future<bool> hold({bool onHold = true}) {
+    return FlutterVoipKit.holdCall(this, onHold: onHold);
+  }
+
   Future<bool> handleChangeState() {
     return FlutterVoipKit.callStateChangeHandler!(this);
   }

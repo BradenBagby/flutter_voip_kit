@@ -25,6 +25,7 @@ class FlutterVoipKit {
   static const _methodChannelReportCallEnded =
       "flutter_voip_kit.reportCallEnded";
   static const _methodChannelEndCall = "flutter_voip_kit.endCall";
+  static const _methodChannelHoldCall = "flutter_voip_kit.holdCall";
 
   //events
   static const event_answerCall = "answerCall";
@@ -44,7 +45,7 @@ class FlutterVoipKit {
         final eventData = Map<String, dynamic>.from(eventDataRaw);
         final event = eventData["event"] as String?;
         final uuid = eventData["uuid"] as String?;
-        final handle = eventData["handle"] as String?;
+        final args = eventData["args"] as dynamic?;
         final call = callManager.getCallByUuid(uuid!);
         log("Received broadcast: $eventData");
         switch (event) {
@@ -70,6 +71,7 @@ class FlutterVoipKit {
             }
             break;
           case event_startCall:
+            final handle = args as String?;
             final newCall =
                 callManager.getCallByUuid(uuid)?.copyWith(address: handle) ??
                     Call(
@@ -91,6 +93,17 @@ class FlutterVoipKit {
               }
             }
             break;
+
+          case event_setHeld:
+            final onHold = args as bool;
+            if (call != null) {
+              if (!await callStateChangeHandler!(call
+                ..callState = onHold ? CallState.held : CallState.active)) {
+                log("Failed to set hold for call. Failing");
+                _callFailed(call);
+              }
+            }
+            break;
           case event_reset:
             callManager.endAll();
             break;
@@ -108,7 +121,7 @@ class FlutterVoipKit {
   ///when call failes, report to native device, perform user's action, and remove if user's action returns true
   static Future<bool> _callFailed(Call call) async {
     await reportCallEnded(uuid: call.uuid, reason: CallEndedReason.failed);
-    if (!await callStateChangeHandler!(call..callState = CallState.active)) {
+    if (await callStateChangeHandler!(call..callState = CallState.failed)) {
       callManager.removeCall(call);
       return true;
     }
@@ -153,18 +166,21 @@ class FlutterVoipKit {
       {required String uuid, required CallEndedReason reason}) async {
     String r = reason
         .toString()
-        .replaceFirst("CallEndedReason", ""); //better way to do this??
+        .replaceFirst("CallEndedReason.", ""); //better way to do this??
     final res = await _methodChannel.invokeMethod(
         _methodChannelReportCallEnded, {"uuid": uuid, "reason": r});
     return res as bool;
   }
 
   static Future<bool> endCall(Call call) async {
-    if (await callStateChangeHandler!(call..callState = CallState.ended)) {
-      final res = await _methodChannel
-          .invokeMethod(_methodChannelEndCall, {"uuid": call.uuid});
-      return res as bool;
-    }
-    return false;
+    final res = await _methodChannel
+        .invokeMethod(_methodChannelEndCall, {"uuid": call.uuid});
+    return res as bool;
+  }
+
+  static Future<bool> holdCall(Call call, {bool onHold = true}) async {
+    final res = await _methodChannel.invokeMethod(
+        _methodChannelHoldCall, {"uuid": call.uuid, "hold": onHold});
+    return res as bool;
   }
 }

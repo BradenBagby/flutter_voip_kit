@@ -42,6 +42,12 @@ class _MyAppState extends State<MyApp> {
           dev.log("--------> Call ended");
           await Future.delayed(const Duration(seconds: 1));
           return true;
+        case CallState.failed:
+          dev.log("--------> Call failed");
+          return true;
+        case CallState.held:
+          dev.log("--------> Call held");
+          return true;
         default:
           return false;
           break;
@@ -105,12 +111,27 @@ class _MyAppState extends State<MyApp> {
                               child: Text(call.address),
                             ),
                             Text(call.callState.toString()),
-                            if (call.callState == CallState.active)
+                            if (call.callState == CallState.active) ...[
                               IconButton(
-                                  icon: Icon(Icons.delete),
-                                  onPressed: () {
-                                    call.end();
-                                  })
+                                icon: Icon(Icons.delete),
+                                onPressed: () {
+                                  call.end();
+                                },
+                              ),
+                              IconButton(
+                                icon: Icon(Icons.hourglass_disabled),
+                                onPressed: () {
+                                  call.hold();
+                                },
+                              )
+                            ],
+                            if (call.callState == CallState.held)
+                              IconButton(
+                                icon: Icon(Icons.star),
+                                onPressed: () {
+                                  call.hold(onHold: false);
+                                },
+                              )
                           ],
                         ),
                       );

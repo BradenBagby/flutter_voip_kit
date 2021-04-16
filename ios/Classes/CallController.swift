@@ -26,7 +26,7 @@ enum CallEndedReason : String {
 
 class CallController : NSObject {
     private let provider : CXProvider
-    var actionListener : ((CallEvent, UUID, String?)->Void)?
+    var actionListener : ((CallEvent, UUID, Any?)->Void)?
     private let callController = CXCallController()
     
     override init() {
@@ -164,7 +164,7 @@ extension CallController: CXProviderDelegate {
     
     func provider(_ provider: CXProvider, perform action: CXSetHeldCallAction) {
         print("CallController: Set Held")
-        actionListener?(.setHeld, action.callUUID,nil)
+        actionListener?(.setHeld, action.callUUID,action.isOnHold)
         action.fulfill()
     }
     

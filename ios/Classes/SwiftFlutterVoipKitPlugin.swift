@@ -8,11 +8,11 @@ class CallStreamHandler: NSObject, FlutterStreamHandler {
     
     public func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
         print("CallStreamHandler: on listen");
-        SwiftFlutterVoipKitPlugin.callController.actionListener = { event, uuid, handle in
+        SwiftFlutterVoipKitPlugin.callController.actionListener = { event, uuid, args in
             print("Action listener: \(event)")
             var data = ["event" : event.rawValue, "uuid": uuid.uuidString] as [String: Any]
-            if handle != nil{
-                data["handle"] = handle!
+            if args != nil{
+                data["args"] = args!
             }
             events(data)
         }
@@ -40,6 +40,7 @@ public class SwiftFlutterVoipKitPlugin: NSObject, FlutterPlugin {
     static let _methodChannelReportCallEnded =
         "flutter_voip_kit.reportCallEnded";
     static let _methodChannelEndCall = "flutter_voip_kit.endCall";
+    static let _methodChannelHoldCall = "flutter_voip_kit.holdCall";
     
     public static func register(with registrar: FlutterPluginRegistrar) {
         
@@ -80,7 +81,7 @@ public class SwiftFlutterVoipKitPlugin: NSObject, FlutterPlugin {
                 result(FlutterError.init(code: "bad args", message: nil, details: nil))
             }
         }
-        else if call.method == SwiftFlutterVoipKitPlugin._methodChannelReportOutgoingCall{
+        else if call.method == SwiftFlutterVoipKitPlugin._methodChannelReportCallEnded{
             if let reason = args?["reason"] as? String, let uuid = args?["uuid"] as? String{
                 SwiftFlutterVoipKitPlugin.callController.reportCallEnded(uuid: UUID(uuidString: uuid)!, reason: CallEndedReason.init(rawValue: reason)!);
                 result(true);
@@ -90,6 +91,13 @@ public class SwiftFlutterVoipKitPlugin: NSObject, FlutterPlugin {
         }else if call.method == SwiftFlutterVoipKitPlugin._methodChannelEndCall{
             if let uuid = args?["uuid"] as? String{
                 SwiftFlutterVoipKitPlugin.callController.end(uuid: UUID(uuidString: uuid)!)
+                result(true)
+            }else{
+                result(FlutterError.init(code: "bad args", message: nil, details: nil))
+            }
+        }else if call.method == SwiftFlutterVoipKitPlugin._methodChannelHoldCall{
+            if let uuid = args?["uuid"] as? String, let hold = args?["hold"] as? Bool{
+                SwiftFlutterVoipKitPlugin.callController.setHeld(uuid: UUID(uuidString: uuid)!, onHold: hold)
                 result(true)
             }else{
                 result(FlutterError.init(code: "bad args", message: nil, details: nil))
