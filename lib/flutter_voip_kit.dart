@@ -28,6 +28,8 @@ class FlutterVoipKit {
       "flutter_voip_kit.reportCallEnded";
   static const _methodChannelEndCall = "flutter_voip_kit.endCall";
   static const _methodChannelHoldCall = "flutter_voip_kit.holdCall";
+  static const _methodChannelCheckPermissions =
+      "flutter_voip_kit.checkPermissions";
 
   //events
   static const event_answerCall = "answerCall";
@@ -67,6 +69,9 @@ class FlutterVoipKit {
           case event_reset:
             callManager.endAll();
             break;
+          case "test":
+            log("TEST");
+            break;
           default:
             throw Exception("Unrecognized event");
         }
@@ -82,6 +87,12 @@ class FlutterVoipKit {
   static Future<bool> startCall(String handle) async {
     final res = await _methodChannel
         .invokeMethod(_methodChannelStartCall, {"handle": handle});
+    return res as bool;
+  }
+
+  static Future<bool> checkPermissions() async {
+    final res =
+        await _methodChannel.invokeMethod(_methodChannelCheckPermissions);
     return res as bool;
   }
 

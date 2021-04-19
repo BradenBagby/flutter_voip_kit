@@ -19,6 +19,7 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   final testUUID = "33041937-05b2-464a-98ad-3910cbe0d09e";
   List<Call> calls = [];
+  bool hasPermission = false;
 
   @override
   void initState() {
@@ -68,74 +69,95 @@ class _MyAppState extends State<MyApp> {
           appBar: AppBar(
             title: const Text('Plugin example app'),
           ),
-          body: SafeArea(
-            child: Column(
-              children: [
-                ElevatedButton(
-                  child: Text("Simlualate incoming call"),
-                  onPressed: () {
-                    FlutterVoipKit.reportIncomingCall(
-                        handle: "${Random().nextInt(10)}" * 9, uuid: testUUID);
-                  },
-                ),
-                ElevatedButton(
-                  child: Text("Start Call"),
-                  onPressed: () {
-                    FlutterVoipKit.startCall(
-                      "${Random().nextInt(10)}" * 9,
-                    );
-                  },
-                ),
-                Expanded(
-                  child: ListView.builder(
-                    itemBuilder: (context, index) {
-                      final call = calls[index];
-                      return Container(
-                        color: call.callState == CallState.active
-                            ? Colors.green[300]
-                            : (call.callState == CallState.held ||
-                                    call.callState == CallState.connecting)
-                                ? Colors.yellow[200]
-                                : Colors.red,
-                        padding: EdgeInsets.all(16.0),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Expanded(
-                              child: Text("Number: ${call.address}"),
-                            ),
-                            if (call.callState != CallState.connecting)
-                              ElevatedButton(
-                                onPressed: () {
-                                  call.hold(
-                                      onHold:
-                                          !(call.callState == CallState.held));
-                                },
-                                child: Text(call.callState == CallState.held
-                                    ? "Resume"
-                                    : "Hold"),
-                              ),
-                            if (call.callState == CallState.active)
-                              IconButton(
-                                icon: Icon(
-                                  Icons.phone_disabled_sharp,
-                                  size: 30,
-                                  color: Colors.red,
-                                ),
-                                onPressed: () {
-                                  call.end();
-                                },
-                              ),
-                          ],
-                        ),
-                      );
+          body: !hasPermission
+              ? Center(
+                  child: ElevatedButton(
+                    child: Text("Permission Check"),
+                    onPressed: () {
+                      FlutterVoipKit.checkPermissions().then((value) {
+                        setState(() {
+                          hasPermission = value;
+                        });
+                        if (!value) {
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                            content: Text("no Permissions"),
+                          ));
+                        }
+                      });
                     },
-                    itemCount: calls.length,
                   ),
                 )
-              ],
-            ),
-          )),
+              : SafeArea(
+                  child: Column(
+                    children: [
+                      ElevatedButton(
+                        child: Text("Simlualate incoming call"),
+                        onPressed: () {
+                          FlutterVoipKit.reportIncomingCall(
+                              handle: "${Random().nextInt(10)}" * 9,
+                              uuid: testUUID);
+                        },
+                      ),
+                      ElevatedButton(
+                        child: Text("Start Call"),
+                        onPressed: () {
+                          FlutterVoipKit.startCall(
+                            "${Random().nextInt(10)}" * 9,
+                          );
+                        },
+                      ),
+                      Expanded(
+                        child: ListView.builder(
+                          itemBuilder: (context, index) {
+                            final call = calls[index];
+                            return Container(
+                              color: call.callState == CallState.active
+                                  ? Colors.green[300]
+                                  : (call.callState == CallState.held ||
+                                          call.callState ==
+                                              CallState.connecting)
+                                      ? Colors.yellow[200]
+                                      : Colors.red,
+                              padding: EdgeInsets.all(16.0),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Expanded(
+                                    child: Text("Number: ${call.address}"),
+                                  ),
+                                  if (call.callState != CallState.connecting)
+                                    ElevatedButton(
+                                      onPressed: () {
+                                        call.hold(
+                                            onHold: !(call.callState ==
+                                                CallState.held));
+                                      },
+                                      child: Text(
+                                          call.callState == CallState.held
+                                              ? "Resume"
+                                              : "Hold"),
+                                    ),
+                                  if (call.callState == CallState.active)
+                                    IconButton(
+                                      icon: Icon(
+                                        Icons.phone_disabled_sharp,
+                                        size: 30,
+                                        color: Colors.red,
+                                      ),
+                                      onPressed: () {
+                                        call.end();
+                                      },
+                                    ),
+                                ],
+                              ),
+                            );
+                          },
+                          itemCount: calls.length,
+                        ),
+                      )
+                    ],
+                  ),
+                )),
     );
   }
 }

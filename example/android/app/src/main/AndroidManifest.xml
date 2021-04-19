@@ -1,8 +1,17 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.flutter_voip_kit_example">
+
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.CALL_PHONE" />
+
+
    <application
         android:label="flutter_voip_kit_example"
         android:icon="@mipmap/ic_launcher">
+
+
+
         <activity
             android:name=".MainActivity"
             android:launchMode="singleTop"
@@ -37,5 +46,15 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
+
+       <service android:name="com.example.flutter_voip_kit.VoipConnectionService"
+           android:label="Wazo"
+           android:permission="android.permission.BIND_TELECOM_CONNECTION_SERVICE">
+           <intent-filter>
+               <action android:name="android.telecom.ConnectionService" />
+           </intent-filter>
+       </service>
+
+
     </application>
 </manifest>
