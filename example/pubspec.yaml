@@ -11,7 +11,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-
+  uuid: ^3.0.4
+  
   flutter_voip_kit:
     # When depending on this package from a real application you should use:
     #   flutter_voip_kit: ^x.y.z

@@ -69,6 +69,7 @@ public class SwiftFlutterVoipKitPlugin: NSObject, FlutterPlugin {
         }else if call.method == SwiftFlutterVoipKitPlugin._methodChannelReportIncomingCall{
             if let handle = args?["handle"] as? String, let uuid = args?["uuid"] as? String{
                 SwiftFlutterVoipKitPlugin.callController.reportIncomingCall(uuid: UUID(uuidString: uuid)!, handle: handle) { (error) in
+                    print("ERROR: \(error?.localizedDescription ?? "none")")
                     result(error == nil)
                 }
             }else{

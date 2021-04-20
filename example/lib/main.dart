@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:flutter_voip_kit/call.dart';
 import 'package:flutter_voip_kit/flutter_voip_kit.dart';
+import 'package:uuid/uuid.dart';
 
 void main() {
   runApp(MyApp());
@@ -17,7 +18,6 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  final testUUID = "33041937-05b2-464a-98ad-3910cbe0d09e";
   List<Call> calls = [];
   bool hasPermission = false;
   bool callShouldFail = false;
@@ -41,7 +41,7 @@ class _MyAppState extends State<MyApp> {
     switch (call.callState) {
       case CallState.connecting:
         dev.log("--------------> Call connecting");
-        await Future.delayed(const Duration(seconds: 1));
+        await Future.delayed(const Duration(seconds: 3));
         return true;
         break;
       case CallState.active:
@@ -94,9 +94,12 @@ class _MyAppState extends State<MyApp> {
                       ElevatedButton(
                         child: Text("Simlualate incoming call"),
                         onPressed: () {
-                          FlutterVoipKit.reportIncomingCall(
-                              handle: "${Random().nextInt(10)}" * 9,
-                              uuid: testUUID);
+                          Future.delayed(const Duration(seconds: 2))
+                              .then((value) {
+                            FlutterVoipKit.reportIncomingCall(
+                                handle: "${Random().nextInt(10)}" * 9,
+                                uuid: Uuid().v4());
+                          });
                         },
                       ),
                       ElevatedButton(
@@ -114,11 +117,11 @@ class _MyAppState extends State<MyApp> {
                             return Container(
                               color: call.callState == CallState.active
                                   ? Colors.green[300]
-                                  : (call.callState == CallState.held ||
-                                          call.callState ==
-                                              CallState.connecting)
-                                      ? Colors.yellow[200]
-                                      : Colors.red,
+                                  : call.callState == CallState.held
+                                      ? Colors.yellow[800]
+                                      : (call.callState == CallState.connecting
+                                          ? Colors.yellow[200]
+                                          : Colors.red),
                               padding: EdgeInsets.all(16.0),
                               child: Row(
                                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -126,7 +129,10 @@ class _MyAppState extends State<MyApp> {
                                   Expanded(
                                     child: Text("Number: ${call.address}"),
                                   ),
-                                  if (call.callState != CallState.connecting)
+                                  if (call.callState == CallState.connecting)
+                                    CircularProgressIndicator(),
+                                  if (call.callState != CallState.connecting &&
+                                      call.callState != CallState.incoming)
                                     ElevatedButton(
                                       onPressed: () {
                                         call.hold(

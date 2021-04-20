@@ -52,6 +52,7 @@ class VoipPlugin(private val channel: MethodChannel, private val eventChannel: E
 
 
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
+        Log.d(TAG,"METHOD CALLED: ${call.method}")
         when(call.method){
             FlutterVoipKitPlugin.methodChannelCheckPermissions -> {
                 voipUtilties.checkPhoneAccountPermission(currentActivity!!,result);

@@ -148,7 +148,6 @@ endCall();;
     public void onCallAudioStateChanged(CallAudioState state) {
         super.onCallAudioStateChanged(state);
         Log.d(TAG,"On Call Audio State Changed");
-
     }
 
 }
