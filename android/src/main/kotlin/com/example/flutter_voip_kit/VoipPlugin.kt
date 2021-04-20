@@ -1,5 +1,6 @@
 package com.example.flutter_voip_kit
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.net.Uri
@@ -61,11 +62,55 @@ class VoipPlugin(private val channel: MethodChannel, private val eventChannel: E
             FlutterVoipKitPlugin.methodChannelHoldCall -> {
                 holdCall(call,result)
             }
+            FlutterVoipKitPlugin.methodChannelStartCall -> {
+                startCall(call,result)
+            }
+            FlutterVoipKitPlugin.methodChannelEndCall -> {
+                endCall(call,result)
+            }
+            FlutterVoipKitPlugin.methodChannelReportOutgoingCall -> {
+                reportOutgoingCall(call,result)
+            }
             else -> {
                 result.notImplemented()
             }
         }
 
+    }
+
+    private fun reportOutgoingCall(call: MethodCall, result: MethodChannel.Result) {
+        val uuid : String = call.argument("uuid")!!;
+        val finishedConnecting : Boolean = call.argument("finishedConnecting")!!;
+        if(finishedConnecting){
+            val connection = VoipConnectionService.getConnection(uuid);
+            Log.d(TAG,"report outgoing call: CALL ANSWERED $uuid")
+            connection?.onAnswer();
+        }else{
+            Log.d(TAG,"report outgoing call: CALL CONNECTING $uuid");
+        }
+    }
+
+    @SuppressLint("MissingPermission")
+    private fun startCall(call: MethodCall, result: MethodChannel.Result) {
+        val number : String = call.argument("handle")!!
+        //TODO: allow name passed in as well
+        Log.d(TAG, "startCall number: $number")
+        val extras = Bundle()
+        val uri = Uri.fromParts(PhoneAccount.SCHEME_TEL, number, null)
+        val callExtras = Bundle()
+        callExtras.putString(Constants.EXTRA_CALL_NUMBER, number)
+        extras.putParcelable(TelecomManager.EXTRA_PHONE_ACCOUNT_HANDLE, voipUtilties.handle)
+        extras.putParcelable(TelecomManager.EXTRA_OUTGOING_CALL_EXTRAS, callExtras)
+        voipUtilties.telecomManager.placeCall(uri, extras)
+        result.success(true)
+    }
+
+
+    private fun endCall(call: MethodCall, result: MethodChannel.Result){
+        val uuid : String = call.argument("uuid")!!
+        val connection = VoipConnectionService.getConnection(uuid);
+            connection?.onDisconnect();
+        result.success(true);
     }
 
 
@@ -74,13 +119,12 @@ class VoipPlugin(private val channel: MethodChannel, private val eventChannel: E
         val uuid : String = call.argument("uuid")!!
         val hold : Boolean = call.argument("hold")!!
         val connection = VoipConnectionService.getConnection(uuid)
-        if(connection != null){
             if(hold){
-                connection.onHold();
+                connection?.onHold();
             }else{
-                connection.onUnhold();
+                connection?.onUnhold();
             }
-        }
+        result.success(true);
     }
 
 
