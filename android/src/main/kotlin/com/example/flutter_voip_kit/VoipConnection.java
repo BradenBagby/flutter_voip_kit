@@ -3,7 +3,9 @@ package com.example.flutter_voip_kit;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Build;
+import android.telecom.CallAudioState;
 import android.telecom.Connection;
+import android.telecom.DisconnectCause;
 import android.telecom.TelecomManager;
 import android.util.Log;
 
@@ -13,6 +15,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static com.example.flutter_voip_kit.Constants.EVENT_answerCall;
+import static com.example.flutter_voip_kit.Constants.EVENT_endCall;
+import static com.example.flutter_voip_kit.Constants.EVENT_setHeld;
 import static com.example.flutter_voip_kit.Constants.EXTRA_CALLER_NAME;
 import static com.example.flutter_voip_kit.Constants.EXTRA_CALL_NUMBER;
 import static com.example.flutter_voip_kit.Constants.EXTRA_CALL_UUID;
@@ -58,6 +62,94 @@ public class VoipConnection extends Connection {
 
        VoipPlugin.sink(data);
         Log.d(TAG, "onAnswer executed");
+        setActive();
+    }
+
+    @Override
+    public void onAbort() {
+        super.onAbort();
+        setDisconnected(new DisconnectCause(DisconnectCause.REJECTED));
+endCall();;
+        Log.d(TAG, "onAbort executed");
+    }
+
+    @Override
+    public void onHold() {
+        Log.d(TAG,"On hold");
+        super.onHold();
+        this.setOnHold();
+        final String uuid = handle.get(EXTRA_CALL_UUID);
+        final Map<String,Object> data = new HashMap<String,Object>() {{
+            put("event",EVENT_setHeld);
+            put("uuid",uuid);
+            put("args",true);
+        }};
+        VoipPlugin.sink(data);
+    }
+
+    @Override
+    public void onUnhold() {
+        super.onUnhold();
+        final String uuid = handle.get(EXTRA_CALL_UUID);
+        final Map<String,Object> data = new HashMap<String,Object>() {{
+            put("event",EVENT_setHeld);
+            put("uuid",uuid);
+            put("args",false);
+        }};
+        VoipPlugin.sink(data);
+        setActive();
+
+    }
+
+    @Override
+    public void onReject() {
+        super.onReject();
+        setDisconnected(new DisconnectCause(DisconnectCause.REJECTED));
+       endCall();
+        Log.d(TAG, "onReject executed");
+    }
+    @Override
+    public void onDisconnect() {
+        super.onDisconnect();
+        setDisconnected(new DisconnectCause(DisconnectCause.LOCAL));
+       endCall();
+    }
+
+    void endCall(){
+        Log.d(TAG,"Ending call");
+        final String uuid = handle.get(EXTRA_CALL_UUID);
+        final Map<String,Object> data = new HashMap<String,Object>() {{
+            put("event",EVENT_endCall);
+            put("uuid",uuid);
+        }};
+        VoipPlugin.sink(data);
+        try {
+            ((VoipConnectionService) context).deinitConnection(handle.get(EXTRA_CALL_UUID));
+        } catch(Throwable exception) {
+            Log.e(TAG, "Handle map error", exception);
+        }
+        destroy();
+
+    }
+
+    @Override
+    public void onPlayDtmfTone(char dtmf) {
+
+    Log.d(TAG,"OnPlayDtmfTone");
+    }
+
+    @Override
+    public void onShowIncomingCallUi() {
+        super.onShowIncomingCallUi();
+        Log.d(TAG,"Show incoming call UI");
+    }
+
+    @Override
+    public void onCallAudioStateChanged(CallAudioState state) {
+        super.onCallAudioStateChanged(state);
+        Log.d(TAG,"On Call Audio State Changed");
+
     }
 
 }
+

@@ -58,11 +58,29 @@ class VoipPlugin(private val channel: MethodChannel, private val eventChannel: E
             FlutterVoipKitPlugin.methodChannelReportIncomingCall -> {
                 reportIncomingCall(call, result)
             }
+            FlutterVoipKitPlugin.methodChannelHoldCall -> {
+                holdCall(call,result)
+            }
             else -> {
                 result.notImplemented()
             }
         }
 
+    }
+
+
+    private fun holdCall(call: MethodCall, result: MethodChannel.Result){
+        Log.d(TAG,"Hold call");
+        val uuid : String = call.argument("uuid")!!
+        val hold : Boolean = call.argument("hold")!!
+        val connection = VoipConnectionService.getConnection(uuid)
+        if(connection != null){
+            if(hold){
+                connection.onHold();
+            }else{
+                connection.onUnhold();
+            }
+        }
     }
 
 

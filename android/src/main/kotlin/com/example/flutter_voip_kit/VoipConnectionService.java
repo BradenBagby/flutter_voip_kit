@@ -1,6 +1,7 @@
 package com.example.flutter_voip_kit;
 
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.telecom.Connection;
 import android.telecom.ConnectionRequest;
@@ -15,6 +16,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static android.telecom.Connection.PROPERTY_SELF_MANAGED;
+import static com.example.flutter_voip_kit.Constants.EVENT_endCall;
 import static com.example.flutter_voip_kit.Constants.EXTRA_CALLER_NAME;
 import static com.example.flutter_voip_kit.Constants.EXTRA_CALL_NUMBER;
 import static com.example.flutter_voip_kit.Constants.EXTRA_CALL_UUID;
@@ -22,7 +25,22 @@ import static com.example.flutter_voip_kit.Constants.EXTRA_CALL_UUID;
 public class VoipConnectionService extends ConnectionService {
 
     private static final String TAG = "VoipConnectionService";
-    public static Map<String, VoipConnection> currentConnections = new HashMap<>(); //TOOD: get rid of this
+    public static Map<String, VoipConnection> currentConnections = new HashMap<>();
+
+
+    public static Connection getConnection(String connectionId) {
+        if (currentConnections.containsKey(connectionId)) {
+            return currentConnections.get(connectionId);
+        }
+        return null;
+    }
+
+    public static void deinitConnection(String connectionId) {
+        Log.d(TAG, "deinitConnection:" + connectionId);
+        if (currentConnections.containsKey(connectionId)) {
+            currentConnections.remove(connectionId);
+        }
+    }
 
     @Override
     public Connection onCreateIncomingConnection(PhoneAccountHandle connectionManagerPhoneAccount, ConnectionRequest request) {
@@ -37,6 +55,17 @@ public class VoipConnectionService extends ConnectionService {
         return incomingCallConnection;
     }
 
+    @Override
+    public void onCreateIncomingConnectionFailed(PhoneAccountHandle connectionManagerPhoneAccount, ConnectionRequest request) {
+        super.onCreateIncomingConnectionFailed(connectionManagerPhoneAccount, request);
+        Log.d(TAG,"OnCreateIncomingConnection FAILED");
+        final String uuid = request.getExtras().getString(EXTRA_CALL_UUID);
+        final Map<String,Object> data = new HashMap<String,Object>() {{
+            put("event",EVENT_endCall);
+            put("uuid",uuid);
+        }};
+        VoipPlugin.sink(data);
+    }
 
     private Connection createConnection(ConnectionRequest request) {
         Log.d(TAG, "Create Connection");
@@ -45,19 +74,14 @@ public class VoipConnectionService extends ConnectionService {
         extrasMap.put(EXTRA_CALL_NUMBER, request.getAddress().toString());
         VoipConnection connection = new VoipConnection(this, extrasMap);
         connection.setConnectionCapabilities(Connection.CAPABILITY_MUTE | Connection.CAPABILITY_SUPPORT_HOLD);
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                connection.setConnectionProperties(PROPERTY_SELF_MANAGED);
+            }
+
         connection.setInitializing();
         connection.setExtras(extras);
         currentConnections.put(extras.getString(EXTRA_CALL_UUID), connection);
-
-        // Get other connections for conferencing
-        Map<String, VoipConnection> otherConnections = new HashMap<>();
-        for (Map.Entry<String, VoipConnection> entry : currentConnections.entrySet()) {
-            if(!(extras.getString(EXTRA_CALL_UUID).equals(entry.getKey()))) {
-                otherConnections.put(entry.getKey(), entry.getValue());
-            }
-        }
-        List<Connection> conferenceConnections = new ArrayList<Connection>(otherConnections.values());
-        connection.setConferenceableConnections(conferenceConnections);
 
         return connection;
     }
