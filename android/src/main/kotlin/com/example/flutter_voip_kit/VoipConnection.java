@@ -3,6 +3,7 @@ package com.example.flutter_voip_kit;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Bundle;
 import android.telecom.CallAudioState;
 import android.telecom.Connection;
 import android.telecom.DisconnectCause;
@@ -97,8 +98,15 @@ endCall();;
             put("args",false);
         }};
         VoipPlugin.sink(data);
+        VoipConnectionService.setAllOthersOnHold(uuid);
         setActive();
 
+    }
+
+    @Override
+    public void onCallEvent(String event, Bundle extras) {
+        super.onCallEvent(event, extras);
+        Log.d(TAG,"CALL EVENT: " + event);
     }
 
     @Override

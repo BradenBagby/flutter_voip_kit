@@ -49,6 +49,16 @@ public class VoipConnectionService extends ConnectionService {
         }
     }
 
+    public static void setAllOthersOnHold(String myUID){
+        //put all other calls on hold
+        for (Map.Entry<String,VoipConnection> entry : currentConnections.entrySet()){
+            if(!entry.getKey().contentEquals(myUID)){
+                entry.getValue().onHold();
+            }
+        }
+
+    }
+
     @Override
     public Connection onCreateIncomingConnection(PhoneAccountHandle connectionManagerPhoneAccount, ConnectionRequest request) {
         Log.d(TAG,"OnCreateIncomingConnection");
@@ -104,8 +114,11 @@ public class VoipConnectionService extends ConnectionService {
 
         Log.d(TAG, "onCreateOutgoingConnection: calling");
 
-        //notify fluttter
+
         final String uuid = outgoingCallConnection.getExtras().getString(EXTRA_CALL_UUID);
+        setAllOthersOnHold(uuid);
+
+        //notify fluttter
         final String address = outgoingCallConnection.getExtras().getString(EXTRA_CALL_NUMBER);
         Log.d(TAG,"Created call's uuid" + uuid);
          Map<String,Object> data = new HashMap<String,Object>() {{
