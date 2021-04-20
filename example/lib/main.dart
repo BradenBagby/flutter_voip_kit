@@ -64,7 +64,6 @@ class _HomePageState extends State<HomePage> {
         dev.log("--------------> Call connecting");
         await Future.delayed(const Duration(seconds: 3));
         return true;
-        break;
       case CallState
           .active: //here we would likely begin playig audio out of speakers
         dev.log("--------> Call active");
@@ -81,7 +80,6 @@ class _HomePageState extends State<HomePage> {
         return true;
       default:
         return false;
-        break;
     }
   }
 

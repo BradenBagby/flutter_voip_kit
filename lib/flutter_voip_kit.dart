@@ -6,7 +6,7 @@ import 'package:flutter_voip_kit/call.dart';
 import 'package:flutter_voip_kit/call_manager.dart';
 
 enum CallEndedReason { failed, remoteEnded, unanswered }
-typedef Future<bool> CallStateChangeHandler(Call state);
+typedef Future<bool> CallStateChangeHandler(Call call);
 
 class FlutterVoipKit {
   //public
