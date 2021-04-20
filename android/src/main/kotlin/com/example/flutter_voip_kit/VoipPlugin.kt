@@ -55,7 +55,7 @@ class VoipPlugin(private val channel: MethodChannel, private val eventChannel: E
         Log.d(TAG,"METHOD CALLED: ${call.method}")
         when(call.method){
             FlutterVoipKitPlugin.methodChannelCheckPermissions -> {
-                voipUtilties.checkPhoneAccountPermission(currentActivity!!,result);
+                checkPermissions(call,result)
             }
             FlutterVoipKitPlugin.methodChannelReportIncomingCall -> {
                 reportIncomingCall(call, result)
@@ -81,8 +81,10 @@ class VoipPlugin(private val channel: MethodChannel, private val eventChannel: E
         }
 
     }
-
-
+    private fun checkPermissions(call: MethodCall, result: MethodChannel.Result) {
+        voipUtilties.openSettingsOnNoPermissions = call.argument("openSettings") ?: false;
+        voipUtilties.checkPhoneAccountPermission(currentActivity!!, result);
+    }
     private fun reportOutgoingCall(call: MethodCall, result: MethodChannel.Result) {
         val uuid : String = call.argument("uuid")!!;
         val finishedConnecting : Boolean = call.argument("finishedConnecting")!!;

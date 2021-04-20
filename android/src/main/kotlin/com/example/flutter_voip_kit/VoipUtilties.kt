@@ -26,6 +26,7 @@ class VoipUtilties( val applicationContext : Context) : PluginRegistry.RequestPe
     lateinit var telecomManager: TelecomManager
     lateinit var handle: PhoneAccountHandle
     lateinit var telephonyManager: TelephonyManager
+    var openSettingsOnNoPermissions : Boolean = false;
 
     init {
         registerPhoneAccount(applicationContext,null) //TOOD: pass in init from flutter
@@ -110,10 +111,12 @@ class VoipUtilties( val applicationContext : Context) : PluginRegistry.RequestPe
         return if (current.isEnabled) {
             true;
         } else {
-            val intent = Intent(TelecomManager.ACTION_CHANGE_PHONE_ACCOUNTS)
-            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_MULTIPLE_TASK
+            if(openSettingsOnNoPermissions) { //auto open settings to choose phone account
+                val intent = Intent(TelecomManager.ACTION_CHANGE_PHONE_ACCOUNTS)
+                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_MULTIPLE_TASK
 
-            applicationContext.startActivity(intent)
+                applicationContext.startActivity(intent)
+            }
 
             false;
         }
