@@ -118,6 +118,18 @@ public class VoipConnectionService extends ConnectionService {
         return outgoingCallConnection;
     }
 
+    @Override
+    public void onCreateOutgoingConnectionFailed(PhoneAccountHandle connectionManagerPhoneAccount, ConnectionRequest request) {
+        super.onCreateOutgoingConnectionFailed(connectionManagerPhoneAccount, request);
+        Log.d(TAG,"OnCreateOutgoingConnectionFailed FAILED");
+        final String uuid = request.getExtras().getString(EXTRA_CALL_UUID);
+        final Map<String,Object> data = new HashMap<String,Object>() {{
+            put("event",EVENT_endCall);
+            put("uuid",uuid);
+        }};
+        VoipPlugin.sink(data);
+    }
+
     private Connection createConnection(ConnectionRequest request) {
         Log.d(TAG, "Create Connection");
         Bundle extras = request.getExtras();

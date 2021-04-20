@@ -71,12 +71,16 @@ class VoipPlugin(private val channel: MethodChannel, private val eventChannel: E
             FlutterVoipKitPlugin.methodChannelReportOutgoingCall -> {
                 reportOutgoingCall(call,result)
             }
+            FlutterVoipKitPlugin.methodChannelReportCallEnded -> {
+                reportCallEnded(call,result)
+            }
             else -> {
                 result.notImplemented()
             }
         }
 
     }
+
 
     private fun reportOutgoingCall(call: MethodCall, result: MethodChannel.Result) {
         val uuid : String = call.argument("uuid")!!;
@@ -110,6 +114,14 @@ class VoipPlugin(private val channel: MethodChannel, private val eventChannel: E
         val uuid : String = call.argument("uuid")!!
         val connection = VoipConnectionService.getConnection(uuid);
             connection?.onDisconnect();
+        result.success(true);
+    }
+
+
+    private fun reportCallEnded(call: MethodCall, result: MethodChannel.Result){
+        val uuid : String = call.argument("uuid")!!
+        val connection = VoipConnectionService.getConnection(uuid);
+        connection?.onDisconnect();
         result.success(true);
     }
 

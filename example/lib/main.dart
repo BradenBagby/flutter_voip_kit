@@ -20,6 +20,7 @@ class _MyAppState extends State<MyApp> {
   final testUUID = "33041937-05b2-464a-98ad-3910cbe0d09e";
   List<Call> calls = [];
   bool hasPermission = false;
+  bool callShouldFail = false;
 
   @override
   void initState() {
@@ -99,7 +100,7 @@ class _MyAppState extends State<MyApp> {
                         },
                       ),
                       ElevatedButton(
-                        child: Text("Start Call"),
+                        child: Text("Start Call outgoing call"),
                         onPressed: () {
                           FlutterVoipKit.startCall(
                             "${Random().nextInt(10)}" * 9,

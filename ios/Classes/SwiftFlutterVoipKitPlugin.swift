@@ -41,6 +41,7 @@ public class SwiftFlutterVoipKitPlugin: NSObject, FlutterPlugin {
         "flutter_voip_kit.reportCallEnded";
     static let _methodChannelEndCall = "flutter_voip_kit.endCall";
     static let _methodChannelHoldCall = "flutter_voip_kit.holdCall";
+    static let _methodChannelCheckPermissions = "flutter_voip_kit.checkPermissions";
     
     public static func register(with registrar: FlutterPluginRegistrar) {
         
@@ -102,6 +103,8 @@ public class SwiftFlutterVoipKitPlugin: NSObject, FlutterPlugin {
             }else{
                 result(FlutterError.init(code: "bad args", message: nil, details: nil))
             }
+        }else if call.method == SwiftFlutterVoipKitPlugin._methodChannelCheckPermissions{
+            result(true) //no permissions needed on ios
         }
     }
 }
