@@ -24,7 +24,7 @@ class FlutterVoipKit {
   static CallStateChangeHandler? callStateChangeHandler;
 
   static const _methodChannelName = 'flutter_voip_kit';
-  static const _callEventChannelName = "com.wavv.callEventChannel";
+  static const _callEventChannelName = "flutter_voip_kit.callEventChannel";
   static final _callManager = CallManager();
 
   //methods

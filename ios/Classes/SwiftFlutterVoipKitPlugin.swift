@@ -29,7 +29,7 @@ class CallStreamHandler: NSObject, FlutterStreamHandler {
 
 public class SwiftFlutterVoipKitPlugin: NSObject, FlutterPlugin {
     static let _methodChannelName = "flutter_voip_kit";
-    static let _callEventChannelName = "com.wavv.callEventChannel"
+    static let _callEventChannelName = "flutter_voip_kit.callEventChannel"
     static let callController = CallController()
     
     

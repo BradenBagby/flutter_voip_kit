@@ -42,7 +42,7 @@ class CallController : NSObject {
         if #available(iOS 14.0, *) {
             providerConfiguration = CXProviderConfiguration.init()
         } else {
-            providerConfiguration = CXProviderConfiguration(localizedName: "WAVV")
+            providerConfiguration = CXProviderConfiguration(localizedName: "Flutter Voip Kit") //TODO:
         }
         
         providerConfiguration.supportsVideo = true

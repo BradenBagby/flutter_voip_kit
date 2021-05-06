@@ -33,7 +33,7 @@ class FlutterVoipKitPlugin: FlutterPlugin, ActivityAware {
     }*/
     private const val TAG = "FlutterVoipKitPlugin"
     val methodChannelName = "flutter_voip_kit"
-    val eventChannelName  = "com.wavv.callEventChannel";
+    val eventChannelName  = "flutter_voip_kit.callEventChannel";
 
     ///methods
     val methodChannelStartCall = "flutter_voip_kit.startCall"

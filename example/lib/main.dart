@@ -182,6 +182,7 @@ class _HomePageState extends State<HomePage> {
   void checkPermissionsUntilGranted() {
     Future.delayed(const Duration(milliseconds: 100)).then((value) async {
       //delay to wait for init state to be done
+      hasPermission = await FlutterVoipKit.checkPermissions(openSettings: false);
       bool first = true; //dont bring to settings first time
       while (!hasPermission) {
         await showDialog(
