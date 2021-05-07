@@ -5,3 +5,7 @@
 ## 0.0.2
 
 * Update package details
+
+## 0.0.3
+
+* optionally pass UUID when starting a call

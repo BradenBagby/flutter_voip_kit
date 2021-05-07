@@ -93,9 +93,13 @@ class FlutterVoipKit {
   //public methods
 
   ///start call initiated from user
-  static Future<bool> startCall(String handle) async {
-    final res = await _methodChannel
-        .invokeMethod(_methodChannelStartCall, {"handle": handle});
+  static Future<bool> startCall(String handle, {String? uuid}) async {
+    Map<String, String> payload = {"handle": handle};
+    if (uuid != null) {
+      payload['uuid'] = uuid;
+    }
+    final res =
+        await _methodChannel.invokeMethod(_methodChannelStartCall, payload);
     return res as bool;
   }
 

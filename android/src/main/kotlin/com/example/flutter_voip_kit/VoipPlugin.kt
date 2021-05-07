@@ -13,6 +13,7 @@ import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.PluginRegistry
+import java.util.*
 
 class VoipPlugin(private val channel: MethodChannel, private val eventChannel: EventChannel, private var applicationContext: Context, private val voipUtilties: VoipUtilties) : MethodChannel.MethodCallHandler {
 
@@ -100,12 +101,20 @@ class VoipPlugin(private val channel: MethodChannel, private val eventChannel: E
     @SuppressLint("MissingPermission")
     private fun startCall(call: MethodCall, result: MethodChannel.Result) {
         val number : String = call.argument("handle")!!
+        val uuidString : String? = call.argument("uuid")
+        var uuid : UUID? = null;
+        if(uuidString != null){
+            uuid = UUID.fromString(uuidString);
+        }
         //TODO: allow name passed in as well
         Log.d(TAG, "startCall number: $number")
         val extras = Bundle()
         val uri = Uri.fromParts(PhoneAccount.SCHEME_TEL, number, null)
         val callExtras = Bundle()
         callExtras.putString(Constants.EXTRA_CALL_NUMBER, number)
+        if (uuid != null) {
+            callExtras.putString(Constants.EXTRA_CALL_UUID, uuid.toString());
+        }
         extras.putParcelable(TelecomManager.EXTRA_PHONE_ACCOUNT_HANDLE, voipUtilties.handle)
         extras.putParcelable(TelecomManager.EXTRA_OUTGOING_CALL_EXTRAS, callExtras)
         voipUtilties.telecomManager.placeCall(uri, extras)

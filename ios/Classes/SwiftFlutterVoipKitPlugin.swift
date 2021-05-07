@@ -61,7 +61,8 @@ public class SwiftFlutterVoipKitPlugin: NSObject, FlutterPlugin {
         let args = call.arguments as? Dictionary<String, Any>
         if(call.method == SwiftFlutterVoipKitPlugin._methodChannelStartCall){
             if let handle = args?["handle"] as? String{
-                SwiftFlutterVoipKitPlugin.callController.startCall(handle: handle, videoEnabled: false)
+                let uuidString = args?["uuid"] as? String;
+                SwiftFlutterVoipKitPlugin.callController.startCall(handle: handle, videoEnabled: false, uuid: uuidString)
                 result(true)
             }else{
                 result(FlutterError.init(code: "bad args", message: nil, details: nil))

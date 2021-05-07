@@ -123,11 +123,11 @@ extension CallController {
         requestTransaction(transaction)
     }
     
-    func startCall(handle: String, videoEnabled: Bool) {
+    func startCall(handle: String, videoEnabled: Bool, uuid: String? = nil) {
         print("CallController: user requested start call \(handle)")
         let handle = CXHandle(type: .phoneNumber, value: handle)
-        
-        let startCallAction = CXStartCallAction(call: UUID(), handle: handle)
+        let callUUID = uuid == nil ? UUID() : UUID(uuidString: uuid!);
+        let startCallAction = CXStartCallAction(call: callUUID!, handle: handle)
         startCallAction.isVideo = videoEnabled
         
         let transaction = CXTransaction(action: startCallAction)
