@@ -133,16 +133,16 @@ class FlutterVoipKit {
   }
 
   ///end call initiated by user. Also could call Call.end()
-  static Future<bool> endCall(Call call) async {
+  static Future<bool> endCall(String uuid) async {
     final res = await _methodChannel
-        .invokeMethod(_methodChannelEndCall, {"uuid": call.uuid});
+        .invokeMethod(_methodChannelEndCall, {"uuid": uuid});
     return res as bool;
   }
 
   ///hold call initiated by user. Also could call Call.hold()
-  static Future<bool> holdCall(Call call, {bool onHold = true}) async {
+  static Future<bool> holdCall(String uuid, {bool onHold = true}) async {
     final res = await _methodChannel.invokeMethod(
-        _methodChannelHoldCall, {"uuid": call.uuid, "hold": onHold});
+        _methodChannelHoldCall, {"uuid": uuid, "hold": onHold});
     return res as bool;
   }
 

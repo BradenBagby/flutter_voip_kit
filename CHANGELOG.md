@@ -9,3 +9,4 @@
 ## 0.0.3
 
 * optionally pass UUID when starting a call
+* actions to FlutterVoipKit only require call's uuid to be known

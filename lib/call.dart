@@ -22,12 +22,12 @@ class Call {
 
   ///End the call initiated by the user
   Future<bool> end() async {
-    return FlutterVoipKit.endCall(this);
+    return FlutterVoipKit.endCall(this.uuid);
   }
 
   ///hold the call initiated by the user
   Future<bool> hold({bool onHold = true}) {
-    return FlutterVoipKit.holdCall(this, onHold: onHold);
+    return FlutterVoipKit.holdCall(this.uuid, onHold: onHold);
   }
 
   Call({
