@@ -10,3 +10,7 @@
 
 * optionally pass UUID when starting a call
 * actions to FlutterVoipKit only require call's uuid to be known
+
+# 0.0.4
+
+* ios report incoming call public for integrating with voip notifications
