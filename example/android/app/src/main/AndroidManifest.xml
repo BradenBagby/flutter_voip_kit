@@ -48,7 +48,7 @@
             android:value="2" />
 
        <service android:name="com.example.flutter_voip_kit.VoipConnectionService"
-           android:label="Wazo"
+           android:label="VoipConnectionService"
            android:permission="android.permission.BIND_TELECOM_CONNECTION_SERVICE">
            <intent-filter>
                <action android:name="android.telecom.ConnectionService" />
