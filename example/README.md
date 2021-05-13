@@ -10,13 +10,23 @@ Demonstrates how to use the flutter_voip_kit plugin.
 IOS: 
 Add Voip background modes in Xcode
 
-This project is a starting point for a Flutter application.
+Android:
 
-A few resources to get you started if this is your first Flutter project:
+Add Permissions in Android Manifest in <manifest> block
+```
+        <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.CALL_PHONE" />
+``` 
 
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
+Add Service in Android Manifest inside <application> block. You can change android:label to fit your project
+```
+         <service android:name="com.example.flutter_voip_kit.VoipConnectionService"
+           android:label="VoipConnectionService"
+           android:permission="android.permission.BIND_TELECOM_CONNECTION_SERVICE">
+           <intent-filter>
+               <action android:name="android.telecom.ConnectionService" />
+           </intent-filter>
+       </service>
 
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+```

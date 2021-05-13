@@ -1,17 +1,15 @@
 package com.example.flutter_voip_kit
 
+import android.content.Context
 import android.util.Log
 import androidx.annotation.NonNull
 
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
-import io.flutter.plugin.common.EventChannel
-import io.flutter.plugin.common.MethodCall
-import io.flutter.plugin.common.MethodChannel
+import io.flutter.plugin.common.*
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
-import io.flutter.plugin.common.PluginRegistry
 import io.flutter.plugin.common.PluginRegistry.Registrar
 
 /** FlutterVoipKitPlugin
@@ -21,16 +19,11 @@ import io.flutter.plugin.common.PluginRegistry.Registrar
  * */
 class FlutterVoipKitPlugin: FlutterPlugin, ActivityAware {
   companion object {
-   // @JvmStatic
-    /*fun registerWith(registrar: PluginRegistry.Registrar) {
-      val channel = MethodChannel(registrar.messenger(), "co.doneservices/callkeep")
-      val utilties  = VoipUtilties(registrar.context().applicationContext)
-      val plugin = VoipPlugin(channel, registrar.context().applicationContext,utilties)
-
-      plugin.currentActivity = registrar.activity()
-
-      registrar.addRequestPermissionsResultListener(utilties)
-    }*/
+    @JvmStatic
+    fun registerWith(registrar: PluginRegistry.Registrar) {
+        val plugin = FlutterVoipKitPlugin();
+        plugin.setup(registrar.messenger(),registrar.context().applicationContext);
+    }
     private const val TAG = "FlutterVoipKitPlugin"
     val methodChannelName = "flutter_voip_kit"
     val eventChannelName  = "flutter_voip_kit.callEventChannel";
@@ -58,14 +51,17 @@ class FlutterVoipKitPlugin: FlutterPlugin, ActivityAware {
   private var methodCallHandler: VoipPlugin? = null
   private var _utilties : VoipUtilties? = null
 
-  override fun onAttachedToEngine(binding: FlutterPlugin.FlutterPluginBinding) {
-    val channel = MethodChannel(binding.binaryMessenger, methodChannelName)
-    val eventChannel = EventChannel(binding.binaryMessenger,eventChannelName)
-    val utilties  = VoipUtilties(binding.applicationContext)
-    val plugin = VoipPlugin(channel,eventChannel, binding.applicationContext,utilties)
+    fun setup(messenger: BinaryMessenger, context : Context){
+        val channel = MethodChannel(messenger, methodChannelName)
+        val eventChannel = EventChannel(messenger,eventChannelName)
+        val utilties  = VoipUtilties(context)
+        val plugin = VoipPlugin(channel,eventChannel, context,utilties)
 
-    methodCallHandler = plugin
-    _utilties = utilties
+        methodCallHandler = plugin
+        _utilties = utilties
+    }
+  override fun onAttachedToEngine(binding: FlutterPlugin.FlutterPluginBinding) {
+setup(binding.binaryMessenger,binding.applicationContext);
   }
 
   override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {

@@ -13,4 +13,5 @@
 
 # 0.0.4
 
-* ios report incoming call public for integrating with voip notifications
+* Android works with V1 too
+* setup instructions
