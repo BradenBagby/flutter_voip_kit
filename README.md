@@ -5,6 +5,31 @@ Use iOS CallKit and Android's Telecom library to create and receive calls with n
 ## Getting Started
 To use this plugin, add `flutter_voip_kit` as a [dependency in your pubspec.yaml file]
 
+### Setup
+
+IOS: 
+Add Voip background modes in Xcode
+
+Android:
+
+Add Permissions in Android Manifest in <manifest> block
+```
+        <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.CALL_PHONE" />
+``` 
+
+Add Service in Android Manifest inside <application> block. You can change android:label to fit your project
+```
+         <service android:name="com.example.flutter_voip_kit.VoipConnectionService"
+           android:label="VoipConnectionService"
+           android:permission="android.permission.BIND_TELECOM_CONNECTION_SERVICE">
+           <intent-filter>
+               <action android:name="android.telecom.ConnectionService" />
+           </intent-filter>
+       </service>
+```
+
 ### API
 Be sure to check out th example project in /example
 
