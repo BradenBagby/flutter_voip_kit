@@ -73,22 +73,32 @@ class VoipUtilties( val applicationContext : Context) : PluginRegistry.RequestPe
     }
 
 
-         fun checkPhoneAccountPermission(activity: Activity?, result: MethodChannel.Result) {
+         fun checkPhoneAccountPermission(activity: Activity?, result: MethodChannel.Result, performRequest : Boolean = true) {
 
             if (!isConnectionServiceAvailable()) {
                 result.error(E_ACTIVITY_DOES_NOT_EXIST, "ConnectionService not available for this version of Android.", null)
+                result.success(false);
                 return
             }
             if (activity == null) {
                 result.error(E_ACTIVITY_DOES_NOT_EXIST, "Activity doesn't exist", null)
+                result.success(false);
                 return
             }
             val allPermissions = requiredPermissions
             hasPhoneAccountResult = result
-            if (!this.hasPermissions(activity)) {
-                ActivityCompat.requestPermissions(activity, allPermissions, REQUEST_READ_PHONE_STATE)
+
+             //if we do not have permissions, perform request or return false
+            if (!this.hasPermissions(activity)){
+                if(performRequest) {
+                    ActivityCompat.requestPermissions(activity, allPermissions, REQUEST_READ_PHONE_STATE)
+                }else{
+                    result.success(false);
+                }
                 return
             }
+
+             //if we do have permissions, see if we are a phone account
              val hasPhoneAccount = hasPhoneAccount();
             result.success(hasPhoneAccount)
         }
@@ -108,7 +118,7 @@ class VoipUtilties( val applicationContext : Context) : PluginRegistry.RequestPe
         var allAccounts = telecomManager.callCapablePhoneAccounts;
         Log.d(TAG, allAccounts.toString());
         var current = telecomManager!!.getPhoneAccount(handle);
-        return if (current.isEnabled) {
+        return if (current != null && current.isEnabled) {
             true;
         } else {
             if(openSettingsOnNoPermissions) { //auto open settings to choose phone account

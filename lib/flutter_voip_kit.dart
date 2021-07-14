@@ -106,9 +106,10 @@ class FlutterVoipKit {
   ///check if device can handle making calls
   ///
   ///`openSettings` - whether to auto open device settings on permission failure
-  static Future<bool> checkPermissions({bool openSettings = false}) async {
+  ///'`performRequest` - whether or not to show the native permission request if no permissions
+  static Future<bool> checkPermissions({bool openSettings = false, bool performRequest = true}) async {
     final res = await _methodChannel.invokeMethod(
-        _methodChannelCheckPermissions, {"openSettings": openSettings});
+        _methodChannelCheckPermissions, {"openSettings": openSettings,"performRequest": performRequest});
     return res as bool;
   }
 

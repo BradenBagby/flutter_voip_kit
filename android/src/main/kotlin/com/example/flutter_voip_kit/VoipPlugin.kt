@@ -84,8 +84,10 @@ class VoipPlugin(private val channel: MethodChannel, private val eventChannel: E
     }
     private fun checkPermissions(call: MethodCall, result: MethodChannel.Result) {
         voipUtilties.openSettingsOnNoPermissions = call.argument("openSettings") ?: false;
-        voipUtilties.checkPhoneAccountPermission(currentActivity!!, result);
+        val performRequest = call.argument("performRequest") ?: true;
+        voipUtilties.checkPhoneAccountPermission(currentActivity!!, result, performRequest);
     }
+
     private fun reportOutgoingCall(call: MethodCall, result: MethodChannel.Result) {
         val uuid : String = call.argument("uuid")!!;
         val finishedConnecting : Boolean = call.argument("finishedConnecting")!!;
