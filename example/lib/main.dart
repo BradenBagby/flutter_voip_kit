@@ -40,7 +40,9 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
 
-    FlutterVoipKit.init(callStateChangeHandler: callStateChangeHandler);
+    FlutterVoipKit.init(
+        callStateChangeHandler: callStateChangeHandler,
+        callActionHandler: callActionHandler);
 
     checkPermissionsUntilGranted();
 
@@ -78,6 +80,22 @@ class _HomePageState extends State<HomePage> {
       case CallState.held: //pause audio for specified call
         dev.log("--------> Call held");
         return true;
+      default:
+        return false;
+    }
+  }
+
+  Future<bool> callActionHandler(Call call, CallAction action) async {
+    dev.log("widget call action handler: $call");
+    setState(
+        () {}); //calls states have been updated, setState so ui can reflect that
+
+    //it is important we perform logic and return true/false for every CallState possible
+    switch (action) {
+      case CallAction.muted:
+        //EXAMPLE: here we would perform the logic on our end to mute the audio streams between the caller and reciever
+        return true;
+        break;
       default:
         return false;
     }
@@ -155,7 +173,7 @@ class _HomePageState extends State<HomePage> {
                                       ? "Resume"
                                       : "Hold"),
                                 ),
-                              if (call.callState == CallState.active)
+                              if (call.callState == CallState.active) ...[
                                 IconButton(
                                   icon: Icon(
                                     Icons.phone_disabled_sharp,
@@ -166,6 +184,15 @@ class _HomePageState extends State<HomePage> {
                                     call.end();
                                   },
                                 ),
+                                IconButton(
+                                    icon: Icon(
+                                      call.muted ? Icons.mic : Icons.mic_off,
+                                      size: 30,
+                                    ),
+                                    onPressed: () {
+                                      call.mute(muted: !call.muted);
+                                    })
+                              ]
                             ],
                           ),
                         );
@@ -182,7 +209,8 @@ class _HomePageState extends State<HomePage> {
   void checkPermissionsUntilGranted() {
     Future.delayed(const Duration(milliseconds: 100)).then((value) async {
       //delay to wait for init state to be done
-      hasPermission = await FlutterVoipKit.checkPermissions(openSettings: false);
+      hasPermission =
+          await FlutterVoipKit.checkPermissions(openSettings: false);
       bool first = true; //dont bring to settings first time
       while (!hasPermission) {
         await showDialog(

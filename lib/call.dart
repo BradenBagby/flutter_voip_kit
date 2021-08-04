@@ -4,6 +4,9 @@ import 'flutter_voip_kit.dart';
 
 enum CallState { connecting, active, held, ended, failed, incoming }
 
+//when we update a call's action, we need to verify it completes successfully
+enum CallAction { muted }
+
 ///Call object represents a call going on with the users device
 class Call {
   ///UUID of call
@@ -17,6 +20,7 @@ class Call {
 
   ///current state of call
   CallState callState;
+  bool muted = false;
 
   //actions
 
@@ -28,6 +32,11 @@ class Call {
   ///hold the call initiated by the user
   Future<bool> hold({bool onHold = true}) {
     return FlutterVoipKit.holdCall(this.uuid, onHold: onHold);
+  }
+
+  ///mute the call initiated by the user
+  Future<bool> mute({bool muted = true}) {
+    return FlutterVoipKit.muteCall(this.uuid, muted: muted);
   }
 
   Call({

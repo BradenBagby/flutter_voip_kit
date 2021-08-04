@@ -7,6 +7,7 @@ import 'package:flutter_voip_kit/call_manager.dart';
 
 enum CallEndedReason { failed, remoteEnded, unanswered }
 typedef Future<bool> CallStateChangeHandler(Call call);
+typedef Future<bool> CallActionHandler(Call call, CallAction action);
 
 class FlutterVoipKit {
   //public
@@ -22,6 +23,13 @@ class FlutterVoipKit {
   ///
   ///See example for more details
   static CallStateChangeHandler? callStateChangeHandler;
+
+  /// handle call action requests and return if event is successful or not
+  /// similar to callStateChangeHandler, but handles any action that is not a call state change
+  /// See CallAction enum for list of actions
+  ///
+  /// see example for more details
+  static CallActionHandler? callActionHandler;
 
   static const _methodChannelName = 'flutter_voip_kit';
   static const _callEventChannelName = "flutter_voip_kit.callEventChannel";
@@ -39,6 +47,7 @@ class FlutterVoipKit {
   static const _methodChannelHoldCall = "flutter_voip_kit.holdCall";
   static const _methodChannelCheckPermissions =
       "flutter_voip_kit.checkPermissions";
+  static const _methodChannelMuteCall = "flutter_voip_kit.muteCall";
 
   //events
   static const event_answerCall = "answerCall";
@@ -46,6 +55,7 @@ class FlutterVoipKit {
   static const event_setHeld = "setHeld";
   static const event_reset = "reset";
   static const event_startCall = "startCall";
+  static const event_setMuted = "setMuted";
 
   static const MethodChannel _methodChannel =
       const MethodChannel(_methodChannelName);
@@ -53,8 +63,10 @@ class FlutterVoipKit {
       const EventChannel(_callEventChannelName);
 
   static Future<void> init(
-      {required CallStateChangeHandler callStateChangeHandler}) async {
+      {required CallStateChangeHandler callStateChangeHandler,
+      required CallActionHandler callActionHandler}) async {
     FlutterVoipKit.callStateChangeHandler = callStateChangeHandler;
+    FlutterVoipKit.callActionHandler = callActionHandler;
 
     ///listen to event channel for device updates on call states
     _callEventChannel.receiveBroadcastStream().listen((eventDataRaw) async {
@@ -75,6 +87,9 @@ class FlutterVoipKit {
           case event_setHeld:
             _setHeld(eventData);
             break;
+          case event_setMuted:
+            _setMuted(eventData);
+            break;
           case event_reset:
             _callManager.endAll();
             break;
@@ -90,7 +105,7 @@ class FlutterVoipKit {
     });
   }
 
-  //public methods
+  // MARK: public methods
 
   ///start call initiated from user
   static Future<bool> startCall(String handle, {String? uuid}) async {
@@ -107,9 +122,11 @@ class FlutterVoipKit {
   ///
   ///`openSettings` - whether to auto open device settings on permission failure
   ///'`performRequest` - whether or not to show the native permission request if no permissions
-  static Future<bool> checkPermissions({bool openSettings = false, bool performRequest = true}) async {
+  static Future<bool> checkPermissions(
+      {bool openSettings = false, bool performRequest = true}) async {
     final res = await _methodChannel.invokeMethod(
-        _methodChannelCheckPermissions, {"openSettings": openSettings,"performRequest": performRequest});
+        _methodChannelCheckPermissions,
+        {"openSettings": openSettings, "performRequest": performRequest});
     return res as bool;
   }
 
@@ -142,8 +159,15 @@ class FlutterVoipKit {
 
   ///hold call initiated by user. Also could call Call.hold()
   static Future<bool> holdCall(String uuid, {bool onHold = true}) async {
-    final res = await _methodChannel.invokeMethod(
-        _methodChannelHoldCall, {"uuid": uuid, "hold": onHold});
+    final res = await _methodChannel
+        .invokeMethod(_methodChannelHoldCall, {"uuid": uuid, "hold": onHold});
+    return res as bool;
+  }
+
+  ///mute call initiated by user. Also could call Call.mute
+  static Future<bool> muteCall(String uuid, {bool muted = true}) async {
+    final res = await _methodChannel
+        .invokeMethod(_methodChannelMuteCall, {"uuid": uuid, "muted": muted});
     return res as bool;
   }
 
@@ -207,6 +231,19 @@ class FlutterVoipKit {
       if (!await callStateChangeHandler!(
           call..callState = onHold ? CallState.held : CallState.active)) {
         log("Failed to set hold for call. Failing");
+        _callFailed(call);
+      }
+    }
+  }
+
+  static void _setMuted(Map<String, dynamic> eventData) async {
+    final uuid = eventData["uuid"] as String;
+    final muted = eventData["args"] as bool;
+    final call = _callManager.getCallByUuid(uuid);
+    if (call != null) {
+      if (!await callActionHandler!(call..muted = muted, CallAction.muted)) {
+        log("Failed to set muted for call");
+        // for now we just fail the call. Would be nice to revert call to muted state of the system but wed have to write special case in order to dodge the infinite loop it would cause
         _callFailed(call);
       }
     }

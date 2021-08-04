@@ -16,6 +16,7 @@ enum CallEvent : String {
     case setHeld = "setHeld"
     case reset = "reset"
     case startCall = "startCall"
+    case setMuted = "setMuted"
 }
 
 enum CallEndedReason : String {
@@ -123,6 +124,13 @@ extension CallController {
         requestTransaction(transaction)
     }
     
+    func setMute(uuid: UUID, muted: Bool){
+        let muteCallAction = CXSetMutedCallAction(call: uuid, muted: muted);
+        let transaction = CXTransaction()
+        transaction.addAction(muteCallAction)
+        requestTransaction(transaction)
+    }
+    
     func startCall(handle: String, videoEnabled: Bool, uuid: String? = nil) {
         print("CallController: user requested start call \(handle)")
         let handle = CXHandle(type: .phoneNumber, value: handle)
@@ -165,6 +173,12 @@ extension CallController: CXProviderDelegate {
     func provider(_ provider: CXProvider, perform action: CXSetHeldCallAction) {
         print("CallController: Set Held")
         actionListener?(.setHeld, action.callUUID,action.isOnHold)
+        action.fulfill()
+    }
+    
+     func provider(_ provider: CXProvider, perform action: CXSetMutedCallAction) {
+        print("CallController: Set Held")
+        actionListener?(.setMuted, action.callUUID,action.isMuted)
         action.fulfill()
     }
     

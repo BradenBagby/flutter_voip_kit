@@ -42,6 +42,7 @@ public class SwiftFlutterVoipKitPlugin: NSObject, FlutterPlugin {
     static let _methodChannelEndCall = "flutter_voip_kit.endCall";
     static let _methodChannelHoldCall = "flutter_voip_kit.holdCall";
     static let _methodChannelCheckPermissions = "flutter_voip_kit.checkPermissions";
+    static let _methodChannelMuteCall = "flutter_voip_kit.muteCall";
     
     public static func register(with registrar: FlutterPluginRegistrar) {
         
@@ -66,6 +67,7 @@ public class SwiftFlutterVoipKitPlugin: NSObject, FlutterPlugin {
     
     //TODO: remove these defaults and get as arguments
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+        print("Method call \(call.method)");
         let args = call.arguments as? Dictionary<String, Any>
         if(call.method == SwiftFlutterVoipKitPlugin._methodChannelStartCall){
             if let handle = args?["handle"] as? String{
@@ -112,6 +114,13 @@ public class SwiftFlutterVoipKitPlugin: NSObject, FlutterPlugin {
             }
         }else if call.method == SwiftFlutterVoipKitPlugin._methodChannelCheckPermissions{
             result(true) //no permissions needed on ios
+        }else if call.method == SwiftFlutterVoipKitPlugin._methodChannelMuteCall{
+            if let uuid = args?["uuid"] as? String, let muted = args?["muted"] as? Bool{
+                SwiftFlutterVoipKitPlugin.callController.setMute(uuid: UUID(uuidString: uuid)!, muted: muted)
+                result(true)
+            }else{
+                result(FlutterError.init(code: "bad args", message: nil, details: nil))
+            }
         }
     }
 }
