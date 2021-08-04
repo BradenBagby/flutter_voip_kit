@@ -6,6 +6,7 @@ import android.content.Context
 import android.net.Uri
 import android.os.Bundle
 import android.os.CountDownTimer
+import android.telecom.CallAudioState
 import android.telecom.PhoneAccount
 import android.telecom.TelecomManager
 import android.util.Log
@@ -75,6 +76,9 @@ class VoipPlugin(private val channel: MethodChannel, private val eventChannel: E
             }
             FlutterVoipKitPlugin.methodChannelReportCallEnded -> {
                 reportCallEnded(call,result)
+            }
+            FlutterVoipKitPlugin.methodChannelMuteCall -> {
+                muteCall(call,result)
             }
             else -> {
                 result.notImplemented()
@@ -153,6 +157,21 @@ class VoipPlugin(private val channel: MethodChannel, private val eventChannel: E
         result.success(true);
     }
 
+    private fun muteCall(call: MethodCall, result: MethodChannel.Result) {
+        Log.d(TAG,"Mute call");
+        val uuid : String = call.argument("uuid")!!
+        val muted : Boolean = call.argument("muted")!!
+        val connection = VoipConnectionService.getConnection(uuid)
+        val newAudioState = if (muted) {
+            CallAudioState(true, connection.callAudioState.route,
+                    connection.callAudioState.supportedRouteMask)
+        } else {
+            CallAudioState(false, connection.callAudioState.route,
+                    connection.callAudioState.supportedRouteMask)
+        }
+        connection.onCallAudioStateChanged(newAudioState)
+        result.success(true);
+    }
 
 
    private fun reportIncomingCall(call: MethodCall, result: MethodChannel.Result){

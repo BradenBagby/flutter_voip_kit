@@ -11,5 +11,6 @@ public class Constants {
     public static final String  EVENT_setHeld = "setHeld";
     public static final String  EVENT_reset = "reset";
     public static final String  EVENT_startCall = "startCall";
+    public static final String EVENT_setMuted = "setMuted";
 
 }

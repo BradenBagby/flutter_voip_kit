@@ -18,6 +18,7 @@ import java.util.Map;
 import static com.example.flutter_voip_kit.Constants.EVENT_answerCall;
 import static com.example.flutter_voip_kit.Constants.EVENT_endCall;
 import static com.example.flutter_voip_kit.Constants.EVENT_setHeld;
+import static com.example.flutter_voip_kit.Constants.EVENT_setMuted;
 import static com.example.flutter_voip_kit.Constants.EXTRA_CALLER_NAME;
 import static com.example.flutter_voip_kit.Constants.EXTRA_CALL_NUMBER;
 import static com.example.flutter_voip_kit.Constants.EXTRA_CALL_UUID;
@@ -100,8 +101,9 @@ endCall();;
         VoipPlugin.sink(data);
         VoipConnectionService.setAllOthersOnHold(uuid);
         setActive();
-
     }
+
+
 
     @Override
     public void onCallEvent(String event, Bundle extras) {
@@ -153,9 +155,16 @@ endCall();;
     }
 
     @Override
-    public void onCallAudioStateChanged(CallAudioState state) {
+    public void onCallAudioStateChanged(final CallAudioState state) {
         super.onCallAudioStateChanged(state);
-        Log.d(TAG,"On Call Audio State Changed");
+        Log.d(TAG,"On Call Audio State Changed, is muted: " + state.isMuted());
+        final String uuid = handle.get(EXTRA_CALL_UUID);
+        final Map<String,Object> data = new HashMap<String,Object>() {{
+            put("event",EVENT_setMuted);
+            put("uuid",uuid);
+            put("args",state.isMuted());
+        }};
+        VoipPlugin.sink(data);
     }
 
 }

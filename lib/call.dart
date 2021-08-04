@@ -60,7 +60,8 @@ class Call {
       'uuid': uuid,
       'address': address,
       'outgoing': outgoing,
-      'callState': this.callState.index
+      'callState': this.callState.index,
+      'muted': muted
     };
   }
 
@@ -68,7 +69,7 @@ class Call {
 
   @override
   String toString() =>
-      'Call(uuid: $uuid, address: $address, outgoing: $outgoing, state: $callState)';
+      'Call(uuid: $uuid, address: $address, outgoing: $outgoing, state: $callState), muted: $muted';
 
   @override
   bool operator ==(Object other) {
@@ -78,10 +79,15 @@ class Call {
         other.uuid == uuid &&
         other.address == address &&
         other.outgoing == outgoing &&
-        other.callState == callState;
+        other.callState == callState &&
+        other.muted != muted;
   }
 
   @override
   int get hashCode =>
-      uuid.hashCode ^ address.hashCode ^ outgoing.hashCode ^ callState.hashCode;
+      uuid.hashCode ^
+      address.hashCode ^
+      outgoing.hashCode ^
+      callState.hashCode ^
+      muted.hashCode;
 }

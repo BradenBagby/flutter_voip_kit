@@ -36,7 +36,8 @@ class FlutterVoipKitPlugin: FlutterPlugin, ActivityAware {
             "flutter_voip_kit.reportCallEnded";
     val methodChannelEndCall = "flutter_voip_kit.endCall";
     val methodChannelHoldCall = "flutter_voip_kit.holdCall";
-    val methodChannelCheckPermissions = "flutter_voip_kit.checkPermissions" //TODO: ios
+    val methodChannelCheckPermissions = "flutter_voip_kit.checkPermissions"
+    val methodChannelMuteCall = "flutter_voip_kit.muteCall"
 
   }
 
