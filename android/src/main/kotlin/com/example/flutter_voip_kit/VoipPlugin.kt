@@ -99,6 +99,9 @@ class VoipPlugin(private val channel: MethodChannel, private val eventChannel: E
             val connection = VoipConnectionService.getConnection(uuid);
             Log.d(TAG,"report outgoing call: CALL ANSWERED $uuid")
             connection?.onAnswer();
+
+            //if we have already ended the call return false
+            result.success(connection != null);
         }else{
             Log.d(TAG,"report outgoing call: CALL CONNECTING $uuid");
         }

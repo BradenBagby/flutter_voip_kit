@@ -215,7 +215,12 @@ class FlutterVoipKit {
       _callFailed(newCall);
     } else {
       _callManager.addCall(newCall);
-      _reportOutgoingCall(uuid: newCall.uuid, finishedConnecting: true);
+
+      //failed to report to os that the call has connected likely means os failed the call early
+      if (!await _reportOutgoingCall(
+          uuid: newCall.uuid, finishedConnecting: true)) {
+        _callFailed(newCall);
+      }
       if (!await callStateChangeHandler!(
           newCall..callState = CallState.active)) {
         await _callFailed(newCall);
