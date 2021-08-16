@@ -70,6 +70,7 @@ public class VoipConnection extends Connection {
     @Override
     public void onAbort() {
         super.onAbort();
+        Log.d(TAG,"ON ABORT");
         setDisconnected(new DisconnectCause(DisconnectCause.REJECTED));
 endCall();;
         Log.d(TAG, "onAbort executed");
@@ -115,12 +116,14 @@ endCall();;
     public void onReject() {
         super.onReject();
         setDisconnected(new DisconnectCause(DisconnectCause.REJECTED));
+        Log.d(TAG,"ON REJECT");
        endCall();
         Log.d(TAG, "onReject executed");
     }
     @Override
     public void onDisconnect() {
         super.onDisconnect();
+        Log.d(TAG,"ON DISCONNECT");
         setDisconnected(new DisconnectCause(DisconnectCause.LOCAL));
        endCall();
     }

@@ -219,6 +219,7 @@ class FlutterVoipKit {
       //failed to report to os that the call has connected likely means os failed the call early
       if (!await _reportOutgoingCall(
           uuid: newCall.uuid, finishedConnecting: true)) {
+            log("Failed to report outgoing call as connected so we are failing the call");
         _callFailed(newCall);
       }
       if (!await callStateChangeHandler!(
