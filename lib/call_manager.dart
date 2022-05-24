@@ -16,8 +16,10 @@ class CallManager {
   ///retrievs a call by its UUID if it exists in the current calls
   Call? getCallByUuid(String uuid) {
     try {
-      return _calls.firstWhere(
-          (element) => element.uuid.toLowerCase() == uuid.toLowerCase());
+      return _calls.isEmpty
+          ? null
+          : _calls.firstWhere(
+              (element) => element.uuid.toLowerCase() == uuid.toLowerCase());
     } catch (er) {
       return null;
     }

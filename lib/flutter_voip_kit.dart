@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:developer';
+import 'package:flutter/foundation.dart';
 
 import 'package:flutter/services.dart';
 import 'package:flutter_voip_kit/call.dart';
@@ -65,6 +66,9 @@ class FlutterVoipKit {
   static Future<void> init(
       {required CallStateChangeHandler callStateChangeHandler,
       required CallActionHandler callActionHandler}) async {
+    if (kIsWeb) {
+      return;
+    }
     FlutterVoipKit.callStateChangeHandler = callStateChangeHandler;
     FlutterVoipKit.callActionHandler = callActionHandler;
 
@@ -124,6 +128,9 @@ class FlutterVoipKit {
   ///'`performRequest` - whether or not to show the native permission request if no permissions
   static Future<bool> checkPermissions(
       {bool openSettings = false, bool performRequest = true}) async {
+    if (kIsWeb) {
+      return false;
+    }
     final res = await _methodChannel.invokeMethod(
         _methodChannelCheckPermissions,
         {"openSettings": openSettings, "performRequest": performRequest});
@@ -219,7 +226,7 @@ class FlutterVoipKit {
       //failed to report to os that the call has connected likely means os failed the call early
       if (!await _reportOutgoingCall(
           uuid: newCall.uuid, finishedConnecting: true)) {
-            log("Failed to report outgoing call as connected so we are failing the call");
+        log("Failed to report outgoing call as connected so we are failing the call");
         _callFailed(newCall);
       }
       if (!await callStateChangeHandler!(
