@@ -25,12 +25,12 @@ enum CallEndedReason : String {
     case remoteEnded = "remoteEnded"
 }
 
-class CallController : NSObject {
+public class CallController : NSObject {
     private let provider : CXProvider
     var actionListener : ((CallEvent, UUID, Any?)->Void)?
     private let callController = CXCallController()
     
-    override init() {
+    override public init() {
         provider = CXProvider(configuration: CallController.providerConfiguration)
         
         super.init()
@@ -53,7 +53,7 @@ class CallController : NSObject {
         return providerConfiguration
     }()
     
-    func reportIncomingCall(
+    public func reportIncomingCall(
         uuid: UUID,
         handle: String,
         hasVideo: Bool = false,
@@ -146,43 +146,43 @@ extension CallController {
 
 //MARK: System notifications
 extension CallController: CXProviderDelegate {
-    func providerDidReset(_ provider: CXProvider) {
+    public func providerDidReset(_ provider: CXProvider) {
         
     }
     
     //action.callUUID
-    func provider(_ provider: CXProvider, perform action: CXAnswerCallAction) {
+    public func provider(_ provider: CXProvider, perform action: CXAnswerCallAction) {
         print("CallController: Answer Call")
         actionListener?(.answerCall,action.callUUID,nil)
         action.fulfill()
     }
     
-    func provider(_ provider: CXProvider, didActivate audioSession: AVAudioSession) {
+    public func provider(_ provider: CXProvider, didActivate audioSession: AVAudioSession) {
         //startAudio()
         
         print("CallController: Audio session activated")
         
     }
     
-    func provider(_ provider: CXProvider, perform action: CXEndCallAction) {
+    public func provider(_ provider: CXProvider, perform action: CXEndCallAction) {
         print("CallController: End Call")
         actionListener?(.endCall, action.callUUID,nil)
         action.fulfill()
     }
     
-    func provider(_ provider: CXProvider, perform action: CXSetHeldCallAction) {
+    public func provider(_ provider: CXProvider, perform action: CXSetHeldCallAction) {
         print("CallController: Set Held")
         actionListener?(.setHeld, action.callUUID,action.isOnHold)
         action.fulfill()
     }
     
-     func provider(_ provider: CXProvider, perform action: CXSetMutedCallAction) {
+    public func provider(_ provider: CXProvider, perform action: CXSetMutedCallAction) {
         print("CallController: Set Held")
         actionListener?(.setMuted, action.callUUID,action.isMuted)
         action.fulfill()
     }
     
-    func provider(_ provider: CXProvider, perform action: CXStartCallAction) {
+    public func provider(_ provider: CXProvider, perform action: CXStartCallAction) {
         actionListener?(.startCall, action.callUUID, action.handle.value)
         print("CallController: Start Call")
     }
