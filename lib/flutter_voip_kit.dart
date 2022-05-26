@@ -57,6 +57,7 @@ class FlutterVoipKit {
   static const event_reset = "reset";
   static const event_startCall = "startCall";
   static const event_setMuted = "setMuted";
+  static const event_callStartedFromNative = "callStartedFromNative";
 
   static const MethodChannel _methodChannel =
       const MethodChannel(_methodChannelName);
@@ -97,8 +98,8 @@ class FlutterVoipKit {
           case event_reset:
             _callManager.endAll();
             break;
-          case "test":
-            log("TEST");
+          case event_callStartedFromNative:
+            _callStartedFromNative(eventData);
             break;
           default:
             throw Exception("Unrecognized event");
@@ -203,6 +204,20 @@ class FlutterVoipKit {
         _callManager.removeCall(call);
       }
     }
+  }
+
+  /// a call was started from the native code, so we just want to make sure we reference it in dart
+  /// this is used when voip notification calls flutter_voip_kit natively to start call and we just want to keep track of it
+  static void _callStartedFromNative(Map<String, dynamic> eventData) async {
+    final uuid = eventData["uuid"] as String;
+    final handle = eventData["args"] as String?;
+    final call = Call(
+        address: handle ?? "unknown",
+        uuid: uuid,
+        outgoing: false,
+        callState: CallState.incoming);
+    _callManager.addCall(call);
+    await callStateChangeHandler!(call..callState = CallState.incoming);
   }
 
   static void _startCall(Map<String, dynamic> eventData) async {

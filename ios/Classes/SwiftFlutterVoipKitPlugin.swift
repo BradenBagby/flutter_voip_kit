@@ -6,17 +6,22 @@ import UIKit
 
 class CallStreamHandler: NSObject, FlutterStreamHandler {
     
+    var eventSink : FlutterEventSink?
+    
     public func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
         print("CallStreamHandler: on listen");
-        SwiftFlutterVoipKitPlugin.callController.actionListener = { event, uuid, args in
+        self.eventSink = events
+        SwiftFlutterVoipKitPlugin.callController.actionListener = voipEvent
+        return nil
+    }
+    
+    public func voipEvent (event: CallEvent, uuid: UUID, args : Any?)->Void {
             print("Action listener: \(event)")
             var data = ["event" : event.rawValue, "uuid": uuid.uuidString] as [String: Any]
             if args != nil{
                 data["args"] = args!
             }
-            events(data)
-        }
-        return nil
+            eventSink?(data)
     }
     
     public func onCancel(withArguments arguments: Any?) -> FlutterError? {
@@ -31,6 +36,7 @@ public class SwiftFlutterVoipKitPlugin: NSObject, FlutterPlugin {
     static let _methodChannelName = "flutter_voip_kit";
     static let _callEventChannelName = "flutter_voip_kit.callEventChannel"
     static let callController = CallController()
+    static let callStreamHandler = CallStreamHandler()
     
     
     //methods
@@ -51,14 +57,24 @@ public class SwiftFlutterVoipKitPlugin: NSObject, FlutterPlugin {
         
         //setup event channels
         let callEventChannel = FlutterEventChannel(name: _callEventChannelName, binaryMessenger: registrar.messenger())
-        callEventChannel.setStreamHandler(CallStreamHandler())
+        callEventChannel.setStreamHandler(callStreamHandler)
         
         let instance = SwiftFlutterVoipKitPlugin()
         registrar.addMethodCallDelegate(instance, channel: methodChannel)
     }
     
-    ///useful for integrating with VIOP notifications
-    static public func reportIncomingCall(handle: String, uuid: String, result: FlutterResult?){
+    // report incoming call from native code, then tell dart about this call
+    public static func reportIncomingCallFromNative(handle: String, uuid: UUID, hasVideo: Bool, completion: ((Error?) -> Void)?){
+        callController.reportIncomingCall(uuid: uuid, handle: handle, hasVideo: hasVideo) { err in
+            if err == nil {
+                callStreamHandler.voipEvent(event: .callStartedFromNative, uuid: uuid, args: nil) // TODO: pass info on the call
+            }
+            completion?(err)
+        }
+    }
+    
+    // report incoming call from dart
+    static func reportIncomingCall(handle: String, uuid: String, result: FlutterResult?){
         SwiftFlutterVoipKitPlugin.callController.reportIncomingCall(uuid: UUID(uuidString: uuid)!, handle: handle) { (error) in
             print("ERROR: \(error?.localizedDescription ?? "none")")
             result?(error == nil)
