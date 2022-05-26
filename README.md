@@ -16,6 +16,7 @@ Add Permissions in Android Manifest
 ```
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.READ_PHONE_NUMBERS" />
     <uses-permission android:name="android.permission.CALL_PHONE" />
 ``` 
 

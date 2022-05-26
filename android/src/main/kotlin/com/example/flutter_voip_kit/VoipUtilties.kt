@@ -27,10 +27,15 @@ class VoipUtilties( val applicationContext : Context) : PluginRegistry.RequestPe
     lateinit var handle: PhoneAccountHandle
     lateinit var telephonyManager: TelephonyManager
     var openSettingsOnNoPermissions : Boolean = false;
+    private var requiredPermissions : Array<String>;
+
 
     init {
         registerPhoneAccount(applicationContext,null) //TOOD: pass in init from flutter
-
+        requiredPermissions = arrayOf(Manifest.permission.READ_PHONE_STATE, Manifest.permission.CALL_PHONE, Manifest.permission.RECORD_AUDIO);
+        if(Build.VERSION.SDK_INT > 29){
+           requiredPermissions += Manifest.permission.READ_PHONE_NUMBERS;
+        }
     }
 
     private fun registerPhoneAccount(appContext: Context, imageName: String?) {
@@ -63,7 +68,6 @@ class VoipUtilties( val applicationContext : Context) : PluginRegistry.RequestPe
     companion object {
         private const val E_ACTIVITY_DOES_NOT_EXIST = "E_ACTIVITY_DOES_NOT_EXIST"
         private const val TAG = "VoipUtilties"
-        private val requiredPermissions = arrayOf(Manifest.permission.READ_PHONE_STATE, Manifest.permission.CALL_PHONE, Manifest.permission.RECORD_AUDIO)
         private  val REQUEST_READ_PHONE_STATE = 58251
     }
 

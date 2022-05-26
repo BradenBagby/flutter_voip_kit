@@ -15,3 +15,6 @@
 
 * Android works with V1 too
 * setup instructions
+
+# 0.0.5
+* Updated for Android 11 (https://developer.android.com/about/versions/11/privacy/permissions?authuser=1) See new Android setup requirements in README
