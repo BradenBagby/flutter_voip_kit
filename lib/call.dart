@@ -9,14 +9,17 @@ enum CallAction { muted }
 
 ///Call object represents a call going on with the users device
 class Call {
-  ///UUID of call
+  /// UUID of call
   final String uuid;
 
-  ///address or handle of the call
+  /// address or handle of the call
   final String address;
 
-  ///outgoing is true if call is initiated by the user
+  /// outgoing is true if call is initiated by the user
   final bool outgoing;
+
+  /// metadata on the call
+  final Map<String, dynamic> metadata;
 
   ///current state of call
   CallState callState;
@@ -39,20 +42,25 @@ class Call {
     return FlutterVoipKit.muteCall(this.uuid, muted: muted);
   }
 
-  Call({
-    required this.uuid,
-    required this.address,
-    required this.outgoing,
-    required this.callState,
-  });
+  Call(
+      {required this.uuid,
+      required this.address,
+      required this.outgoing,
+      required this.callState,
+      this.metadata = const {}});
 
   Call copyWith(
-      {String? uuid, String? address, bool? outgoing, CallState? callState}) {
+      {String? uuid,
+      String? address,
+      bool? outgoing,
+      CallState? callState,
+      Map<String, dynamic>? metadata}) {
     return Call(
         uuid: uuid ?? this.uuid,
         address: address ?? this.address,
         outgoing: outgoing ?? this.outgoing,
-        callState: callState ?? this.callState);
+        callState: callState ?? this.callState,
+        metadata: metadata ?? this.metadata);
   }
 
   Map<String, dynamic> toMap() {
@@ -61,7 +69,8 @@ class Call {
       'address': address,
       'outgoing': outgoing,
       'callState': this.callState.index,
-      'muted': muted
+      'muted': muted,
+      'metadata': metadata
     };
   }
 
@@ -80,7 +89,8 @@ class Call {
         other.address == address &&
         other.outgoing == outgoing &&
         other.callState == callState &&
-        other.muted != muted;
+        other.muted != muted &&
+        other.metadata == metadata;
   }
 
   @override
@@ -89,5 +99,6 @@ class Call {
       address.hashCode ^
       outgoing.hashCode ^
       callState.hashCode ^
-      muted.hashCode;
+      muted.hashCode ^
+      metadata.hashCode;
 }

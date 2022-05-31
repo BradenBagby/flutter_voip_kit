@@ -210,9 +210,18 @@ class FlutterVoipKit {
   /// this is used when voip notification calls flutter_voip_kit natively to start call and we just want to keep track of it
   static void _callStartedFromNative(Map<String, dynamic> eventData) async {
     final uuid = eventData["uuid"] as String;
-    final handle = eventData["args"] as String?;
+    final args = eventData["args"] as Map<dynamic, dynamic>?;
+    String? handle;
+    Map<String, dynamic> metadata = {};
+    if (args != null) {
+      handle = args["handle"] as String?;
+      metadata = args.containsKey("metadata") && args["metadata"] != null
+          ? Map<String, dynamic>.from(args["metadata"] as Map<dynamic, dynamic>)
+          : {};
+    }
     final call = Call(
         address: handle ?? "unknown",
+        metadata: metadata,
         uuid: uuid,
         outgoing: false,
         callState: CallState.incoming);

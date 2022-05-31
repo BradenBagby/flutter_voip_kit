@@ -64,10 +64,11 @@ public class SwiftFlutterVoipKitPlugin: NSObject, FlutterPlugin {
     }
     
     // report incoming call from native code, then tell dart about this call
-    public static func reportIncomingCallFromNative(handle: String, uuid: UUID, hasVideo: Bool, completion: ((Error?) -> Void)?){
+    public static func reportIncomingCallFromNative(handle: String, uuid: UUID, hasVideo: Bool, metadata : [String:Any?]?, completion: ((Error?) -> Void)?){
         callController.reportIncomingCall(uuid: uuid, handle: handle, hasVideo: hasVideo) { err in
             if err == nil {
-                callStreamHandler.voipEvent(event: .callStartedFromNative, uuid: uuid, args: nil) // TODO: pass info on the call
+                let args = ["handle" : handle, "metadata": metadata!] as [String: Any]
+                callStreamHandler.voipEvent(event: .callStartedFromNative, uuid: uuid, args: args)
             }
             completion?(err)
         }
