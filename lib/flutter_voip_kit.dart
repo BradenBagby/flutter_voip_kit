@@ -153,7 +153,7 @@ class FlutterVoipKit {
           outgoing: false,
           callState: CallState.incoming);
       _callManager.addCall(call);
-      await callStateChangeHandler!(call..callState = CallState.incoming);
+      await callStateChangeHandler?.call(call..callState = CallState.incoming);
     }
     return res as bool;
   }
