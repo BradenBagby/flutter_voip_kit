@@ -25,6 +25,8 @@ class Call {
   CallState callState;
   bool muted = false;
 
+  final DateTime startTimestamp;
+
   //actions
 
   ///End the call initiated by the user
@@ -47,19 +49,46 @@ class Call {
       required this.address,
       required this.outgoing,
       required this.callState,
-      this.metadata = const {}});
+      this.muted = false,
+      DateTime? startTimestamp,
+      this.metadata = const {}})
+      : startTimestamp = startTimestamp ?? DateTime.now();
+
+  factory Call.fromJson(String json) {
+    final Map<String, dynamic> map = jsonDecode(json);
+    final uuid = map['uuid'] as String;
+    final address = map['address'] as String;
+    final outgoing = map['outgoing'] as bool;
+    final callStateIndex = map['callState'] as int;
+    final callState = CallState.values[callStateIndex];
+    final muted = map['muted'] as bool;
+    final metadata =
+        Map<String, dynamic>.from(map['metadata'] as Map<dynamic, dynamic>);
+    final startTimestampString = map['startTimestamp'] as String;
+    final startTimestamp = DateTime.parse(startTimestampString);
+    return Call(
+        uuid: uuid,
+        address: address,
+        outgoing: outgoing,
+        callState: callState,
+        metadata: metadata,
+        startTimestamp: startTimestamp,
+        muted: muted);
+  }
 
   Call copyWith(
       {String? uuid,
       String? address,
       bool? outgoing,
       CallState? callState,
+      DateTime? startTimestamp,
       Map<String, dynamic>? metadata}) {
     return Call(
         uuid: uuid ?? this.uuid,
         address: address ?? this.address,
         outgoing: outgoing ?? this.outgoing,
         callState: callState ?? this.callState,
+        startTimestamp: startTimestamp ?? this.startTimestamp,
         metadata: metadata ?? this.metadata);
   }
 
@@ -70,7 +99,8 @@ class Call {
       'outgoing': outgoing,
       'callState': this.callState.index,
       'muted': muted,
-      'metadata': metadata
+      'metadata': metadata,
+      'startTimestamp': startTimestamp.toString()
     };
   }
 
@@ -90,7 +120,8 @@ class Call {
         other.outgoing == outgoing &&
         other.callState == callState &&
         other.muted != muted &&
-        other.metadata == metadata;
+        other.metadata == metadata &&
+        other.startTimestamp == startTimestamp;
   }
 
   @override
@@ -100,5 +131,6 @@ class Call {
       outgoing.hashCode ^
       callState.hashCode ^
       muted.hashCode ^
-      metadata.hashCode;
+      metadata.hashCode ^
+      startTimestamp.hashCode;
 }

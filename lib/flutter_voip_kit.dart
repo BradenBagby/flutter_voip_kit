@@ -182,7 +182,7 @@ class FlutterVoipKit {
   //private methods
   static void _answerCall(Map<String, dynamic> eventData) async {
     final uuid = eventData["uuid"] as String?;
-    final call = _callManager.getCallByUuid(uuid!);
+    final call = await _callManager.getCallByUuid(uuid!);
     if (call != null) {
       if (!await callStateChangeHandler!(
           call..callState = CallState.connecting)) {
@@ -198,7 +198,7 @@ class FlutterVoipKit {
 
   static void _endCall(Map<String, dynamic> eventData) async {
     final uuid = eventData["uuid"] as String?;
-    final call = _callManager.getCallByUuid(uuid!);
+    final call = await _callManager.getCallByUuid(uuid!);
     if (call != null) {
       if (await callStateChangeHandler!(call..callState = CallState.ended)) {
         _callManager.removeCall(call);
@@ -232,13 +232,13 @@ class FlutterVoipKit {
   static void _startCall(Map<String, dynamic> eventData) async {
     final uuid = eventData["uuid"] as String;
     final handle = eventData["args"] as String?;
-    final newCall =
-        _callManager.getCallByUuid(uuid)?.copyWith(address: handle) ??
-            Call(
-                address: handle!,
-                uuid: uuid,
-                outgoing: true,
-                callState: CallState.connecting);
+    final oldCall = await _callManager.getCallByUuid(uuid);
+    final newCall = oldCall?.copyWith(address: handle) ??
+        Call(
+            address: handle!,
+            uuid: uuid,
+            outgoing: true,
+            callState: CallState.connecting);
     _reportOutgoingCall(uuid: newCall.uuid, finishedConnecting: false);
     if (!await callStateChangeHandler!(
         newCall..callState = CallState.connecting)) {
@@ -263,7 +263,7 @@ class FlutterVoipKit {
   static void _setHeld(Map<String, dynamic> eventData) async {
     final uuid = eventData["uuid"] as String;
     final onHold = eventData["args"] as bool;
-    final call = _callManager.getCallByUuid(uuid);
+    final call = await _callManager.getCallByUuid(uuid);
     if (call != null) {
       if (!await callStateChangeHandler!(
           call..callState = onHold ? CallState.held : CallState.active)) {
@@ -276,7 +276,7 @@ class FlutterVoipKit {
   static void _setMuted(Map<String, dynamic> eventData) async {
     final uuid = eventData["uuid"] as String;
     final muted = eventData["args"] as bool;
-    final call = _callManager.getCallByUuid(uuid);
+    final call = await _callManager.getCallByUuid(uuid);
     if (call != null) {
       if (!await callActionHandler!(call..muted = muted, CallAction.muted)) {
         log("Failed to set muted for call");
