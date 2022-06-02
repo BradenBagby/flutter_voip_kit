@@ -141,7 +141,9 @@ class FlutterVoipKit {
   ///report incoming call from notification
   ///This will happen when you're flutter app receives notification on an incoming call and needs to report it to the native OS
   static Future<bool> reportIncomingCall(
-      {required String handle, required String uuid}) async {
+      {required String handle,
+      required String uuid,
+      Map<String, dynamic>? metadata}) async {
     final res = await _methodChannel.invokeMethod(
       _methodChannelReportIncomingCall,
       {"uuid": uuid, "handle": handle},
@@ -151,6 +153,7 @@ class FlutterVoipKit {
           address: handle,
           uuid: uuid,
           outgoing: false,
+          metadata: metadata ?? {},
           callState: CallState.incoming);
       _callManager.addCall(call);
       await callStateChangeHandler?.call(call..callState = CallState.incoming);
