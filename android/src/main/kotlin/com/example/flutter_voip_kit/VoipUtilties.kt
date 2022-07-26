@@ -136,7 +136,7 @@ class VoipUtilties( val applicationContext : Context) : PluginRegistry.RequestPe
         }
     }
 
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>?, grantResults: IntArray?): Boolean {
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray): Boolean {
         if (requestCode != REQUEST_READ_PHONE_STATE) {
             return false
         }
